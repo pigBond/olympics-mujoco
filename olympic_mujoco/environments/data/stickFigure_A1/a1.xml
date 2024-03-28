@@ -1,0 +1,170 @@
+<mujoco model="a1">
+    <!-- 时间步长为0.005秒 -->
+    <option timestep="0.005" />
+
+    <!-- 定义了模型中使用的纹理、材料和其它资源 -->
+    <!-- <texture> 定义了用于渲染的纹理，如天空盒、机器人身体的纹理等。 -->
+    <!-- <material> 定义了材质，关联了纹理并设置了颜色等属性。 -->
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1=".3 .5 .7" rgb2="0 0 0" width="512"
+            height="512" />
+        <texture name="body" type="cube" builtin="flat" mark="cross" width="127" height="1278"
+            rgb1="0.8 0.6 0.4" rgb2="0.8 0.6 0.4" markrgb="1 1 1" random="0.01" />
+        <material name="body" texture="body" texuniform="true" rgba="0.8 0.6 .4 1" />
+        <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".1 .2 .3"
+            rgb2=".2 .3 .4" />
+        <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance=".2" />
+    </asset>
+
+    <!-- 定义了默认的几何形状、关节和其他元素的属性。 -->
+    <!-- <motor> 定义了默认的电机属性，如控制范围和控制是否受限。 -->
+    <!-- <geom> 定义了默认的几何体属性，如形状、摩擦系数、材质等。 -->
+    <!-- <joint> 定义了默认的关节属性，如阻尼、刚度、限位等。 -->
+    <default>
+        <motor ctrlrange="-1 1" ctrllimited="true" />
+        <default class="body">
+            <geom type="capsule" condim="1" friction=".7" solimp=".9 .99 .003" solref=".015 1"
+                material="body" />
+            <joint type="hinge" damping=".2" stiffness="1" armature=".01" limited="true"
+                solimplimit="0 .99 .01" />
+            <default class="big_joint">
+                <joint damping="5" stiffness="10" />
+                <default class="big_stiff_joint">
+                    <joint stiffness="20" />
+                </default>
+            </default>
+        </default>
+    </default>
+
+    <!-- 定义了视觉设置，如渲染质量、阴影大小、全局分辨率等。 -->
+    <visual>
+        <map force="0.1" zfar="30" />
+        <rgba haze="0.15 0.25 0.35 1" />
+        <quality shadowsize="4096" />
+        <global offwidth="800" offheight="800" />
+    </visual>
+
+    <worldbody>
+        <geom name="floor" size="0 0 .05" type="plane" material="grid" condim="3" />
+        <light name="spotlight" mode="targetbodycom" target="torso"
+            diffuse=".8 .8 .8" specular="0.3 0.3 0.3" pos="0 -20 4" cutoff="10" />
+        <body name="torso" pos="0 0 1.5" childclass="body">
+            <light name="top" pos="0 0 2" mode="trackcom" />
+            <camera name="back" pos="-3 0 1" xyaxes="0 -1 0 1 0 2" mode="trackcom" />
+            <camera name="side" pos="0 -3 1" xyaxes="1 0 0 0 1 2" mode="trackcom" />
+            <freejoint name="root" />
+            <geom name="torso" type="sphere" size="0.14" pos="0 0 -0.05" rgba="0.4 0.4 0.4 1" />
+            <body name="head" pos="0 0 .19">
+                <geom name="head" type="sphere" size="0.1" rgba="0 0.6 1 1" />
+                <camera name="egocentric" pos=".09 0 0" xyaxes="0 -1 0 .1 0 1" fovy="80" />
+            </body>
+            <body name="lower_waist" pos="-.01 0 -.26">
+                <geom name="lower_waist" fromto="0 -.06 0 0 .06 0" size=".06" rgba="1 0.6 0 1" />
+                <joint name="pelvis_tz" pos="0 0 .065" axis="0 0 1" range="-45 45"
+                    class="big_stiff_joint" />
+                <joint name="pelvis_ty" pos="0 0 .065" axis="0 1 0" range="-75 30" class="big_joint" />
+                <body name="pelvis" pos="0 0 -.165">
+                    <joint name="pelvis_tx" pos="0 0 .1" axis="1 0 0" range="-35 35"
+                        class="big_joint" />
+                    <geom name="butt" type="sphere" size="0.1" rgba="1 0 0 0.8" />
+                    <body name="right_thigh" pos="0 -.1 -.1">
+                        <joint name="right_hip_x" axis="1 0 0" range="-25 5" class="big_joint" />
+                        <joint name="right_hip_z" axis="0 0 1" range="-60 35" class="big_joint" />
+                        <joint name="right_hip_y" axis="0 1 0" range="-110 20"
+                            class="big_stiff_joint" />
+                        <geom name="right_thigh" fromto="0 0 0 0 .01 -.34" size=".05" rgba="0 1 0 1" />
+                        <body name="right_shin" pos="0 .01 -.403">
+                            <joint name="right_knee" pos="0 0 .02" axis="0 -1 0" range="-160 2" />
+                            <geom name="right_shin" fromto="0 0 -.05 0 0 -.3" size=".05"
+                                rgba="1 1 0 1" />
+                            <body name="right_foot" pos="0 0 -.39">
+                                <joint name="right_ankle_y" pos="0 0 .08" axis="0 1 0"
+                                    range="-50 50" stiffness="6" />
+                                <joint name="right_ankle_x" pos="0 0 .04" axis="1 0 .5"
+                                    range="-50 50" stiffness="3" />
+                                <geom name="right_right_foot" fromto="-.07 -.02 0 .14 -.04 0"
+                                    size=".027" />
+                                <geom name="left_right_foot" fromto="-.07 0 0 .14  .02 0"
+                                    size=".027" />
+                            </body>
+                        </body>
+                    </body>
+                    <body name="left_thigh" pos="0 .1 -.1">
+                        <joint name="left_hip_x" axis="-1 0 0" range="-25 5" class="big_joint" />
+                        <joint name="left_hip_z" axis="0 0 -1" range="-60 35" class="big_joint" />
+                        <joint name="left_hip_y" axis="0 1 0" range="-110 20"
+                            class="big_stiff_joint" />
+                        <geom name="left_thigh" fromto="0 0 0 0 -.01 -.34" size=".05" rgba="0 1 0 1" />
+                        <body name="left_shin" pos="0 -.01 -.403">
+                            <joint name="left_knee" pos="0 0 .02" axis="0 -1 0" range="-160 2" />
+                            <geom name="left_shin" fromto="0 0 -.05 0 0 -.3" size=".05"
+                                rgba="1 1 0 1" />
+                            <body name="left_foot" pos="0 0 -.39">
+                                <joint name="left_ankle_y" pos="0 0 .08" axis="0 1 0" range="-50 50"
+                                    stiffness="6" />
+                                <joint name="left_ankle_x" pos="0 0 .04" axis="1 0 .5"
+                                    range="-50 50" stiffness="3" />
+                                <geom name="left_left_foot" fromto="-.07 .02 0 .14 .04 0"
+                                    size=".027" />
+                                <geom name="right_left_foot" fromto="-.07 0 0 .14 -.02 0"
+                                    size=".027" />
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <body name="right_upper_arm" pos="0 -.17 .06">
+                <joint name="right_shoulder1" axis="2 1 1" range="-85 60" />
+                <joint name="right_shoulder2" axis="0 -1 1" range="-85 60" />
+                <geom name="right_upper_arm" fromto="0 0 0 .15 -.15 -.15" size=".04 .15"
+                    rgba="0 0 1 1" />
+                <body name="right_lower_arm" pos=".18 -.18 -.18">
+                    <joint name="right_elbow" axis="0 -1 1" range="-90 50" stiffness="0" />
+                    <geom name="right_lower_arm" fromto=".01 .01 .01 .14 .14 .14" size=".04"
+                        rgba="1 0 0.6 1" />
+                    <body name="right_hand" pos=".18 .18 .18">
+                        <geom name="right_hand" type="sphere" size=".04" zaxis="1 1 1" />
+                    </body>
+                </body>
+            </body>
+            <body name="left_upper_arm" pos="0 .17 .06">
+                <joint name="left_shoulder1" axis="2 -1 1" range="-60 85" />
+                <joint name="left_shoulder2" axis="0 1 1" range="-60 85" />
+                <geom name="left_upper_arm" fromto="0 0 0 .15 .15 -.15" size=".04 .15"
+                    rgba="0 0 1 1" />
+                <body name="left_lower_arm" pos=".18 .18 -.18">
+                    <joint name="left_elbow" axis="0 -1 -1" range="-90 50" stiffness="0" />
+                    <geom name="left_lower_arm" fromto=".01 -.01 .01 .14 -.14 .14" size=".04"
+                        rgba="1 0 0.6 1" />
+                    <body name="left_hand" pos=".18 -.18 .18">
+                        <geom name="left_hand" type="sphere" size=".04" zaxis="1 -1 1" />
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+
+    <actuator>
+        <motor name="pelvis_ty_actuator" gear="40" joint="pelvis_ty" />
+        <motor name="pelvis_tz_actuator" gear="40" joint="pelvis_tz" />
+        <motor name="pelvis_tx_actuator" gear="40" joint="pelvis_tx" />
+        <motor name="right_hip_x_actuator" gear="40" joint="right_hip_x" />
+        <motor name="right_hip_z_actuator" gear="40" joint="right_hip_z" />
+        <motor name="right_hip_y_actuator" gear="120" joint="right_hip_y" />
+        <motor name="right_knee_actuator" gear="80" joint="right_knee" />
+        <motor name="right_ankle_x_actuator" gear="20" joint="right_ankle_x" />
+        <motor name="right_ankle_y_actuator" gear="20" joint="right_ankle_y" />
+        <motor name="left_hip_x_actuator" gear="40" joint="left_hip_x" />
+        <motor name="left_hip_z_actuator" gear="40" joint="left_hip_z" />
+        <motor name="left_hip_y_actuator" gear="120" joint="left_hip_y" />
+        <motor name="left_knee_actuator" gear="80" joint="left_knee" />
+        <motor name="left_ankle_x_actuator" gear="20" joint="left_ankle_x" />
+        <motor name="left_ankle_y_actuator" gear="20" joint="left_ankle_y" />
+        <motor name="right_shoulder1_actuator" gear="20" joint="right_shoulder1" />
+        <motor name="right_shoulder2_actuator" gear="20" joint="right_shoulder2" />
+        <motor name="right_elbow_actuator" gear="40" joint="right_elbow" />
+        <motor name="left_shoulder1_actuator" gear="20" joint="left_shoulder1" />
+        <motor name="left_shoulder2_actuator" gear="20" joint="left_shoulder2" />
+        <motor name="left_elbow_actuator" gear="40" joint="left_elbow" />
+    </actuator>
+</mujoco>
