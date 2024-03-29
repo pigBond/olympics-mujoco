@@ -19,6 +19,7 @@ import mujoco
 from olympic_mujoco.utils import Trajectory
 from olympic_mujoco.utils import NoReward, CustomReward, TargetVelocityReward, PosReward
 
+from olympic_mujoco.interfaces.mujoco_robot_interface import MujocoRobotInterface
 
 class LocoEnvBase(MultiMuJoCo):
     """
@@ -171,6 +172,19 @@ class LocoEnvBase(MultiMuJoCo):
             self._init_step_no = init_step_no
             # 设置是否使用吸收状态（在某些强化学习任务中,用于指示一个episode的结束）
             self._use_absorbing_states = use_absorbing_states
+
+    def test(self):
+        # actuator_names = [
+        #     mujoco.mj_id2name(self._model, mujoco.mjtObj.mjOBJ_ACTUATOR, i)
+        #     for i in range(self._model.nu)
+        # ]
+        # print("actuator_names = ",actuator_names)
+        self.mujoco_interface = MujocoRobotInterface(self._model, self._data, 'right_foot', 'left_foot')
+        print(self.mujoco_interface.get_motor_names())
+        print("--------------------------------------------")
+        print(self.mujoco_interface.test())
+
+
 
     def load_trajectory(self, traj_params, warn=True):
         """
@@ -480,6 +494,9 @@ class LocoEnvBase(MultiMuJoCo):
         # 更新观测值助手（用于构建观测值）
         self.obs_helper = self.obs_helpers[self._current_model_idx]
 
+        # print("self._current_model_idx = ",self._current_model_idx)
+        # print("self.obs_helpers = ",self.obs_helpers)
+
         self.setup(obs)
 
         if self._viewer is not None and self.more_than_one_env:
@@ -759,6 +776,7 @@ class LocoEnvBase(MultiMuJoCo):
         """
         # 获取所有的观测键
         keys = self.get_all_observation_keys()
+        # print("keys = ", keys)
         # 计算以 "q_" 开头的键的数量,这些键代表关节位置
         len_qpos = len([key for key in keys if key.startswith("q_")])
         len_qvel = len([key for key in keys if key.startswith("dq_")])
