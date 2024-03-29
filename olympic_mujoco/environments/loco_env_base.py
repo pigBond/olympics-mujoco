@@ -120,6 +120,7 @@ class LocoEnvBase(MultiMuJoCo):
         #     )
         # else:
         #     self._domain_rand = None
+        self._domain_rand = None
 
         super().__init__(
             xml_handles,
@@ -154,7 +155,7 @@ class LocoEnvBase(MultiMuJoCo):
         self.info.action_space.low[:] = -1.0
         self.info.action_space.high[:] = 1.0
         # 为平均地面反作用力设置一个运行平均值窗口
-        # self.mean_grf = self._setup_ground_force_statistics()
+        self.mean_grf = self._setup_ground_force_statistics()
 
         self._dataset = None
 
@@ -359,19 +360,16 @@ class LocoEnvBase(MultiMuJoCo):
         # 设置模拟状态
         self.set_sim_state(sample)
 
-        # 如果需要渲染
         if render:
             # 渲染当前帧,如果记录则保存
             frame = self.render(record)
         else:
             frame = None
 
-        # 如果需要记录
         if record:
             # 将渲染的帧传递给记录器
             recorder(frame)
 
-        # 获取最大的整数值
         highest_int = np.iinfo(np.int32).max
         # 如果每集的步骤数量未指定,则设置为最大整数值
         if n_steps_per_episode is None:
@@ -436,6 +434,127 @@ class LocoEnvBase(MultiMuJoCo):
         self.stop()
         # 如果需要记录
 
+    def reward(self, state, action, next_state, absorbing):
+        """
+        Calls the reward function of the environment.
+
+        """
+
+        return self._reward_function(state, action, next_state, absorbing)
+
+    def reset(self, obs=None):
+        """
+        重置模拟环境的状态。
+
+        Args:
+            obs (可选[np.array]): 用于重置环境的观测值。
+
+        """
+        # 使用MuJoCo库函数重置模型数据和数据结构
+        mujoco.mj_resetData(self._model, self._data)
+        self.mean_grf.reset()
+
+        # 如果设置了域随机化（domain randomization）
+        if self._domain_rand is not None:
+            self._models[self._current_model_idx] = (
+                self._domain_rand.get_randomized_model(self._current_model_idx)
+            )
+            self._datas[self._current_model_idx] = mujoco.MjData(
+                self._models[self._current_model_idx]
+            )
+
+        # 如果开启了随机环境重置
+        if self._random_env_reset:
+            # 随机选择一个模型索引
+            self._current_model_idx = np.random.randint(0, len(self._models))
+        else:
+            # 顺序选择下一个模型索引（如果到达末尾，则回到第一个）
+            self._current_model_idx = (
+                self._current_model_idx + 1
+                if self._current_model_idx < len(self._models) - 1
+                else 0
+            )
+        # 更新当前模型和数据结构
+        self._model = self._models[self._current_model_idx]
+        self._data = self._datas[self._current_model_idx]
+        # 更新观测值助手（用于构建观测值）
+        self.obs_helper = self.obs_helpers[self._current_model_idx]
+
+        self.setup(obs)
+
+        if self._viewer is not None and self.more_than_one_env:
+            self._viewer.load_new_model(self._model)
+
+        self._obs = self._create_observation(self.obs_helper._build_obs(self._data))
+        return self._modify_observation(self._obs)
+
+    def setup(self, obs):
+        """
+        Function to setup the initial state of the simulation. Initialization can be done either
+        randomly, from a certain initial, or from the default initial state of the model.
+        用于设置模拟的初始状态的功能。初始化可以通过随机生成、从特定初始状态或从模型的默认初始状态进行。
+
+        Args:
+            obs (np.array): Observation to initialize the environment from;
+
+        """
+
+        # 重置奖励函数的状态
+        self._reward_function.reset_state()
+
+        # 如果提供了观测值obs，则从obs初始化模拟
+        if obs is not None:
+            self._init_sim_from_obs(obs)
+        else:
+            # 如果没有轨迹数据，不能随机开始
+            if not self.trajectories and self._random_start:
+                raise ValueError("Random start not possible without trajectory data.")
+            # 如果没有轨迹数据，不能设置初始步骤
+            elif not self.trajectories and self._init_step_no is not None:
+                raise ValueError(
+                    "Setting an initial step is not possible without trajectory data."
+                )
+            # 不能同时设置随机开始和初始步骤
+            elif self._init_step_no is not None and self._random_start:
+                raise ValueError(
+                    "Either use a random start or set an initial step, not both."
+                )
+
+            # 如果存在轨迹数据
+            if self.trajectories is not None:
+                if self._random_start:
+                    sample = self.trajectories.reset_trajectory()
+                elif self._init_step_no:
+                    # 获取轨迹长度和轨迹数量
+                    traj_len = self.trajectories.trajectory_length
+                    n_traj = self.trajectories.number_of_trajectories
+                    # 确保初始化步骤编号在有效范围内
+                    assert self._init_step_no <= traj_len * n_traj
+                    # 计算子步骤编号和轨迹编号
+                    substep_no = int(self._init_step_no % traj_len)
+                    traj_no = int(self._init_step_no / traj_len)
+                    sample = self.trajectories.reset_trajectory(substep_no, traj_no)
+                else:
+                    # sample random trajectory and use the first sample
+                    # 随机选择一个轨迹并使用第一个样本
+                    sample = self.trajectories.reset_trajectory(substep_no=0)
+
+                self.set_sim_state(sample)
+
+    def is_absorbing(self, obs):
+        """
+        Checks if an observation is an absorbing state or not.
+
+        Args:
+            obs (np.array): Current observation;
+
+        Returns:
+            True, if the observation is an absorbing state; otherwise False;
+
+        """
+
+        return self._has_fallen(obs) if self._use_absorbing_states else False
+
     def set_sim_state(self, sample):
         """
         根据观察值设置模拟的状态。
@@ -461,6 +580,27 @@ class LocoEnvBase(MultiMuJoCo):
             elif ot == ObservationType.SITE_ROT:
                 self._data.site(name).xmat = value
             # 这里可以扩展其他类型的观察值设置
+
+    def _init_sim_from_obs(self, obs):
+        """
+        从一个观测值初始化模拟。
+
+        Args:
+            obs (np.array): 要将模拟状态设置为的观测值。  The observation to set the simulation state to.
+        """
+        # 确保观测值的维度是一维的
+        assert len(obs.shape) == 1
+        # 在观测值前面添加 x 和 y 位置信息（这里假设观测值不包含这些信息）
+        # 使用全0填充，可能是为了对齐期望的状态格式
+        obs = np.concatenate([[0.0, 0.0], obs])
+        # 获取观测值的规范（可能是观测值的维度或者各个维度的意义）
+        obs_spec = self.obs_helper.observation_spec
+        # 确保观测值的长度至少与观测值规范一样长
+        assert len(obs) >= len(obs_spec)
+        # 移除观测值中不符合观测值规范的部分（如果观测值长度超过了规范长度）
+        obs = obs[: len(obs_spec)]
+        # 设置模拟状态为提供的观测值
+        self.set_sim_state(obs)
 
     def _get_observation_space(self):
         """
@@ -515,6 +655,19 @@ class LocoEnvBase(MultiMuJoCo):
             ).flatten()
 
         return obs
+
+    def _setup_ground_force_statistics(self):
+        """
+        Returns a running average method for the mean ground forces.  By default, 4 ground force sensors are used.
+        Environments that use more or less have to override this function.
+
+        """
+
+        mean_grf = RunningAveragedWindow(
+            shape=(self._get_grf_size(),), window_size=self._n_intermediate_steps
+        )
+
+        return mean_grf
 
     def _get_reward_function(self, reward_type, reward_params):
         """
