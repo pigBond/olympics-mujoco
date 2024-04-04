@@ -60,3 +60,62 @@ class MujocoRobotInterface(object):
 
 
 
+### 多mujoco模型管理
+
+​	第一段代码：
+```python
+self._models = [self.load_model(f) for f in xml_files]
+self._current_model_idx = 0
+self._model = self._models[self._current_model_idx]
+```
+这里做的事情是：
+1. `self._models` 是一个列表，它通过列表推导式从一系列的XML文件中加载了多个模型。假设`self.load_model(f)`是一个方法，它接受一个XML文件的路径`f`作为参数，并返回一个加载好的MuJoCo模型对象。
+
+2. `self._current_model_idx` 被初始化为0，这通常用作当前选定模型的索引。
+
+3. `self._model` 被设置为列表中的第一个模型，即`self._models[0]`。
+  这段代码的目的是为了在一个环境中管理多个模型，需要在不同时间点切换不同的模型。
+
+  
+
+  第二段代码：
+```python
+self.model = mujoco.MjModel.from_xml_path(fullpath)
+```
+这里做的事情是：
+- 这行代码从一个指定的XML文件路径`fullpath`加载了一个单一的MuJoCo模型，并将其赋值给`self.model`属性。这个属性通常代表当前环境的唯一模型。
+
+  
+
+  区别：
+1. **数量**：第一段代码加载了多个模型，而第二段代码只加载了一个模型。
+2. **上下文**：第一段代码是为了在一个循环或选择过程中使用不同的模型，而第二段代码是在初始化时简单地加载了一个模型。
+3. **管理**：第一段代码提供了一个索引和模型列表，允许在模型之间切换；第二段代码只是加载了一个模型，没有提供切换机制。
+总结来说，第一段代码提供了一个模型管理机制，允许动态选择和切换多个模型，而第二段代码是一个单一的模型加载操作，适用于只需要一个模型的情况。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

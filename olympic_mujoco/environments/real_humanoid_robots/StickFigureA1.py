@@ -11,7 +11,7 @@ from olympic_mujoco.environments.loco_env_base import ValidTaskConf
 
 class StickFigureA1(BaseHumanoidRobot):
 
-    valid_task_confs = ValidTaskConf(tasks=["walk", "run"],
+    valid_task_confs = ValidTaskConf(tasks=["walk", "run","test"],
                                      data_types=["real", "perfect"]
                                     )
 
@@ -39,8 +39,6 @@ class StickFigureA1(BaseHumanoidRobot):
         self._disable_back_joint = disable_back_joint
 
         xml_handles = mjcf.from_path(xml_path)
-
-        print("StickFigureA1 xml_handles = ",xml_handles)
 
         super().__init__(xml_handles, action_spec, observation_spec, collision_groups, **kwargs)
 

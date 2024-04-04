@@ -48,6 +48,9 @@ class LocoEnvBase(MultiMuJoCo):
         domain_randomization_config=None,
         parallel_dom_rand=True,
         N_worker_per_xml_dom_rand=4,
+        train_start=False,
+        sim_dt=0.0025,
+        control_dt=0.025,
         **viewer_params
     ):
         """
@@ -92,7 +95,13 @@ class LocoEnvBase(MultiMuJoCo):
                                         如果并行设置为 True,则此数字必须大于 1。
         viewer_params: 其他视图参数。
         """
-        print("locoEnv")
+        #print("locoEnv")
+        
+        # TODO:这里可能还需调整
+        self._frame_skip = (control_dt/sim_dt)
+        self._sim_dt=sim_dt
+        self._train_start=train_start
+
 
         if type(xml_handles) != list:
             xml_handles = [xml_handles]
@@ -173,6 +182,7 @@ class LocoEnvBase(MultiMuJoCo):
             # 设置是否使用吸收状态（在某些强化学习任务中,用于指示一个episode的结束）
             self._use_absorbing_states = use_absorbing_states
 
+
     def test(self):
         # actuator_names = [
         #     mujoco.mj_id2name(self._model, mujoco.mjtObj.mjOBJ_ACTUATOR, i)
@@ -180,11 +190,14 @@ class LocoEnvBase(MultiMuJoCo):
         # ]
         # print("actuator_names = ",actuator_names)
         self.mujoco_interface = MujocoRobotInterface(self._model, self._data, 'right_foot', 'left_foot')
-        print(self.mujoco_interface.get_motor_names())
-        print("--------------------------------------------")
-        print(self.mujoco_interface.test())
+        # print(self.mujoco_interface.get_motor_names())
+        # print("--------------------------------------------")
+        # print(self.mujoco_interface.test())
 
 
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- 轨迹的加载与播放 ----------------------------------------------
+    #---------------------------------------------------------------------------------------------------------
 
     def load_trajectory(self, traj_params, warn=True):
         """
@@ -447,14 +460,13 @@ class LocoEnvBase(MultiMuJoCo):
         # 停止模拟
         self.stop()
         # 如果需要记录
+    
+    #---------------------------------------------------------------------------------------------------------
 
-    def reward(self, state, action, next_state, absorbing):
-        """
-        Calls the reward function of the environment.
 
-        """
-
-        return self._reward_function(state, action, next_state, absorbing)
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- 环境状态的设置 ----------------------------------------------
+    #---------------------------------------------------------------------------------------------------------
 
     def reset(self, obs=None):
         """
@@ -496,6 +508,14 @@ class LocoEnvBase(MultiMuJoCo):
 
         # print("self._current_model_idx = ",self._current_model_idx)
         # print("self.obs_helpers = ",self.obs_helpers)
+
+        # TODO:为了对接LearningHumanoidWalk函数进行机器人行走训练，下面作为测试参数存在
+        if self._train_start is True:
+            # 设置帧跳过数量和仿真时间步长
+            self._model.opt.timestep = self._sim_dt
+            # 初始化模型的位置和速度
+            self.init_qpos = self._data.qpos.ravel().copy()
+            self.init_qvel = self._data.qvel.ravel().copy()
 
         self.setup(obs)
 
@@ -558,20 +578,6 @@ class LocoEnvBase(MultiMuJoCo):
 
                 self.set_sim_state(sample)
 
-    def is_absorbing(self, obs):
-        """
-        Checks if an observation is an absorbing state or not.
-
-        Args:
-            obs (np.array): Current observation;
-
-        Returns:
-            True, if the observation is an absorbing state; otherwise False;
-
-        """
-
-        return self._has_fallen(obs) if self._use_absorbing_states else False
-
     def set_sim_state(self, sample):
         """
         根据观察值设置模拟的状态。
@@ -618,6 +624,27 @@ class LocoEnvBase(MultiMuJoCo):
         obs = obs[: len(obs_spec)]
         # 设置模拟状态为提供的观测值
         self.set_sim_state(obs)
+
+    #---------------------------------------------------------------------------------------------------------
+
+    def is_absorbing(self, obs):
+        """
+        Checks if an observation is an absorbing state or not.
+
+        Args:
+            obs (np.array): Current observation;
+
+        Returns:
+            True, if the observation is an absorbing state; otherwise False;
+
+        """
+
+        return self._has_fallen(obs) if self._use_absorbing_states else False
+    
+
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- 对观测空间操作 ----------------------------------------------
+    #---------------------------------------------------------------------------------------------------------
 
     def _get_observation_space(self):
         """
@@ -672,19 +699,21 @@ class LocoEnvBase(MultiMuJoCo):
             ).flatten()
 
         return obs
+    
+    #---------------------------------------------------------------------------------------------------------
 
-    def _setup_ground_force_statistics(self):
+
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- 奖励函数操作 ----------------------------------------------
+    #---------------------------------------------------------------------------------------------------------
+
+    def reward(self, state, action, next_state, absorbing):
         """
-        Returns a running average method for the mean ground forces.  By default, 4 ground force sensors are used.
-        Environments that use more or less have to override this function.
+        Calls the reward function of the environment.
 
         """
 
-        mean_grf = RunningAveragedWindow(
-            shape=(self._get_grf_size(),), window_size=self._n_intermediate_steps
-        )
-
-        return mean_grf
+        return self._reward_function(state, action, next_state, absorbing)
 
     def _get_reward_function(self, reward_type, reward_params):
         """
@@ -719,6 +748,45 @@ class LocoEnvBase(MultiMuJoCo):
             )
 
         return reward_func
+    
+    #---------------------------------------------------------------------------------------------------------
+
+
+    # TODO:这个函数不应该在这里
+    def set_state(self, qpos, qvel):
+        # 设置模型的状态，包括位置和速度
+        assert qpos.shape == (self._model.nq,) and qvel.shape == (self._model.nv,)
+        self._data.qpos[:] = qpos
+        self._data.qvel[:] = qvel
+        mujoco.mj_forward(self._model, self._data)
+
+    def uploadGPU(self, hfieldid=None, meshid=None, texid=None):
+        # 上传模型数据到GPU
+        # hfield
+        if hfieldid is not None:
+            mujoco.mjr_uploadHField(self._model, self._viewer.ctx, hfieldid)
+        # mesh
+        if meshid is not None:
+            mujoco.mjr_uploadMesh(self._model, self._viewer.ctx, meshid)
+        # texture
+        if texid is not None:
+            mujoco.mjr_uploadTexture(self._model, self._viewer.ctx, texid)
+
+
+    def _setup_ground_force_statistics(self):
+        """
+        Returns a running average method for the mean ground forces.  By default, 4 ground force sensors are used.
+        Environments that use more or less have to override this function.
+
+        """
+
+        mean_grf = RunningAveragedWindow(
+            shape=(self._get_grf_size(),), window_size=self._n_intermediate_steps
+        )
+
+        return mean_grf
+
+    
 
     # TODO: 这里是否还要抽象出一个类 但是这里已经是调用obs_helper类了
     def _get_joint_pos(self):

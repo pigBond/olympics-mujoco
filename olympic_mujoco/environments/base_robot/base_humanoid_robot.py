@@ -145,12 +145,18 @@ class BaseHumanoidRobot(LocoEnvBase):
         print("base_robot generate")
 
         # Generate the MDP based on the specified task
+        # TODO：这里实际上是触发real_robot层的__init__函数
         if task == "walk":
             reward_params = dict(target_velocity=1.25)
             mdp = env(reward_type="target_velocity", reward_params=reward_params, **kwargs)
         elif task == "run":
             reward_params = dict(target_velocity=2.5)
             mdp = env(reward_type="target_velocity", reward_params=reward_params, **kwargs)
+        elif task== "test":
+            print("base_humanoid_robot task==test --------------")
+            reward_params = dict(target_velocity=2.5)
+            mdp = env(reward_type="target_velocity", reward_params=reward_params, **kwargs)
+
 
         # Load the trajectory
         # Calculate the environment and desired control frequencies

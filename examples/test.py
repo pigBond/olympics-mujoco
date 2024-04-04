@@ -19,14 +19,14 @@ def experiment(seed=0):
 
     # mdp = LocoEnv.make("TestHumanoid.run.perfect")
     # mdp = LocoEnvBase.make("UnitreeH1.run.perfect")
-    mdp = LocoEnvBase.make("StickFigureA1.run.real")
+    mdp = LocoEnvBase.make("StickFigureA1.test.real")
 
-    # mdp.play_trajectory_from_velocity(n_episodes=3, n_steps_per_episode=500)
+    mdp.play_trajectory_from_velocity(n_episodes=3, n_steps_per_episode=500)
 
     # mdp.play_trajectory(n_episodes=3, n_steps_per_episode=500)
     # print(mdp.get_all_task_names())
     
-    mdp.test()
+    # mdp.test()
 
 if __name__ == '__main__':
     experiment()
