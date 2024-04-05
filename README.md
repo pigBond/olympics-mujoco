@@ -56,6 +56,16 @@ class MujocoRobotInterface(object):
 
 
 
+### mujoco viewer
+
+现在的版本使用的是mushroom rl的模型加载类,可能是这个原因导致无法正确加载模型的mesh
+
+经过测试发现mujoco的原生viewer是可以正确加载的
+
+TODO: 所以后续尝试修改模型的加载方式
+
+
+
 
 
 
@@ -74,7 +84,7 @@ self._model = self._models[self._current_model_idx]
 2. `self._current_model_idx` 被初始化为0，这通常用作当前选定模型的索引。
 
 3. `self._model` 被设置为列表中的第一个模型，即`self._models[0]`。
-  这段代码的目的是为了在一个环境中管理多个模型，需要在不同时间点切换不同的模型。
+    这段代码的目的是为了在一个环境中管理多个模型，需要在不同时间点切换不同的模型。
 
   
 

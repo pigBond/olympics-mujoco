@@ -1,0 +1,493 @@
+<mujoco model="jvrc1 scene">
+  <compiler angle="radian" />
+  <option timestep="0.001" cone="pyramidal" jacobian="dense" solver="Newton" iterations="50"
+    tolerance="1e-10" />
+  <size njmax="1200" nconmax="400" />
+  <visual>
+    <global azimuth="120" elevation="-20" />
+    <headlight ambient="0.3 0.3 0.3" diffuse="0.6 0.6 0.6" specular="0 0 0" />
+    <rgba haze="0.15 0.25 0.35 1" />
+  </visual>
+  <default>
+    <default class="/">
+      <joint pos="0 0 0" limited="true" damping="0.2" />
+      <geom type="mesh" condim="1" />
+      <motor ctrllimited="false" forcelimited="false" />
+      <default class="collision">
+        <geom condim="3" group="0" />
+      </default>
+      <default class="visual">
+        <geom contype="0" conaffinity="0" group="1" />
+      </default>
+    </default>
+  </default>
+  <asset>
+    <!-- collision meshes -->
+    <texture name="//unnamed_texture_0" type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7"
+      rgb2="0 0 0" width="512" height="3072" />
+    <texture name="groundplane" type="2d" builtin="checker" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+      mark="edge" markrgb="0.8 0.8 0.8" width="300" height="300" />
+    <material name="groundplane" class="/" texture="groundplane" texrepeat="1 1" texuniform="true"
+      reflectance="0.2" />
+    <mesh name="R_HIP_R_col" class="/" file="R_HIP_R_S-65ebcee9985aaf60a4b607d6fa2b467ae2d3d446.stl" />
+    <mesh name="R_HIP_Y_col" class="/" file="R_HIP_Y_S-4fa886a93534eb18e27ca552ee6d15df4790d72c.stl" />
+    <mesh name="R_KNEE_col" class="/" file="R_KNEE_S-2abbac71964a188085ed4b561a8354b703b23322.stl" />
+    <mesh name="L_HIP_R_col" class="/" file="L_HIP_R_S-65ebcee9985aaf60a4b607d6fa2b467ae2d3d446.stl" />
+    <mesh name="L_HIP_Y_col" class="/" file="L_HIP_Y_S-4fa886a93534eb18e27ca552ee6d15df4790d72c.stl" />
+    <mesh name="L_KNEE_col" class="/" file="L_KNEE_S-c62fc9878d2a12b5e961aa4ea854058fbfb0ef74.stl" />
+    <mesh name="PELVIS_vis" class="/" file="PELVIS_S-c1d03c9d16fbcc36ea9b3417cfde036544fe3622.obj" />
+    <mesh name="R_HIP_R_vis" class="/" file="R_HIP_R_S-86f20e13e737d80ff88c9835ee4cbb337eb201ae.obj" />
+    <mesh name="R_HIP_Y_vis" class="/" file="R_HIP_Y_S-62ee6eec344938548a4058a09065fe60fb6163b1.obj" />
+    <mesh name="R_KNEE1_vis" class="/"
+      file="R_KNEE_S_1-6e69ae88e13b17c1a08ef8fcb6edc1d5120ab71c.obj" />
+    <mesh name="R_KNEE2_vis" class="/"
+      file="R_KNEE_S_2-179f91f19dbfcf2c17764277e64117683e884d39.obj" />
+    <mesh name="R_ANKLE_P_vis" class="/"
+      file="R_ANKLE_P_S-17a1612da108f39ecc0d99206dd8e019625a489c.obj" />
+    <mesh name="L_HIP_R_vis" class="/" file="L_HIP_R_S-96563368f4b6a01b8e971155249f46beb3fec1e5.obj" />
+    <mesh name="L_HIP_Y_vis" class="/" file="L_HIP_Y_S-63b1f0711c9051dc83b3faad4ab7340cc1d35bfc.obj" />
+    <mesh name="L_KNEE1_vis" class="/"
+      file="L_KNEE_S_1-e133da46a827be55b5c7362d08781d7b2fc45bee.obj" />
+    <mesh name="L_KNEE2_vis" class="/"
+      file="L_KNEE_S_2-86dcc1f3e00736552c87f108aede589601e8bb3b.obj" />
+    <mesh name="L_ANKLE_P_vis" class="/"
+      file="L_ANKLE_P_S-c13d9be50e15e03beded35a8ec269424b0ad16cc.obj" />
+    <mesh name="WAIST_Y_vis" class="/" file="WAIST_Y_S-0c135791f0b8316a760ebf11a9903090a970ca40.obj" />
+    <mesh name="WAIST_R_F_vis" class="/"
+      file="WAIST_R_S_F-dd2a97b922b11f9da69d2b9691eef8a2cb435b75.obj" />
+    <mesh name="WAIST_R_R_vis" class="/"
+      file="WAIST_R_S_R-7161cf2d180e433c924a8f5f4f5847698efdf2ce.obj" />
+    <mesh name="NECK_Y_vis" class="/" file="NECK_Y_S-f0e030640e62d7b9fb712700472ce6f1be8fd453.obj" />
+    <mesh name="NECK_P_F_vis" class="/"
+      file="NECK_P_S_F-917705759da76cdfe23509252303a5260124e6af.obj" />
+    <mesh name="NECK_P_R_vis" class="/"
+      file="NECK_P_S_R-bc5698d912881256aa29fe3df982b9c373c9fa90.obj" />
+    <mesh name="R_SHOULDER_P_vis" class="/"
+      file="R_SHOULDER_P_S-ed7b2900d88e18dea74383c1c4ba1a56c1996c3f.obj" />
+    <mesh name="R_SHOULDER_Y_vis" class="/"
+      file="R_SHOULDER_Y_S-3b291685025798441c3d6e7498d39551574c7c18.obj" />
+    <mesh name="R_ELBOW_P_vis" class="/"
+      file="R_ELBOW_P_S-fae23109ace642427a8f0fed855e8e8d13c7ad43.obj" />
+    <mesh name="R_ELBOW_Y_vis" class="/"
+      file="R_ELBOW_Y_S-50ab43a9c6e987cf1b2bcf360ca8ccc058927a9a.obj" />
+    <mesh name="R_WRIST_Y_vis" class="/"
+      file="R_WRIST_Y_S-479027b4f2ffbc56b8c14043fd7de78d85175e4f.obj" />
+    <mesh name="R_UTHUMB_vis" class="/"
+      file="R_UTHUMB_S-2d42cc3a4a31d8a7923ccc6dd8c720836cc80bc0.obj" />
+    <mesh name="R_LTHUMB_vis" class="/"
+      file="R_LTHUMB_S-d9fb514929ae0d86a64c2212a2b1730f6cc78b9c.obj" />
+    <mesh name="R_UINDEX_vis" class="/"
+      file="R_UINDEX_S-72c63b064e9afb39cca0d8596f3c492404b2cc75.obj" />
+    <mesh name="R_LINDEX_vis" class="/"
+      file="R_LINDEX_S-120ee8093791077e1e654f9e4e949538c0b0d7ab.obj" />
+    <mesh name="R_ULITTLE_vis" class="/"
+      file="R_ULITTLE_S-e7cbee90bc5193855c4051e9877a563399e17948.obj" />
+    <mesh name="R_LLITTLE_vis" class="/"
+      file="R_LLITTLE_S-c8e0f1733f88756271b666a990c3aa4a20384587.obj" />
+    <mesh name="L_SHOULDER_P_vis" class="/"
+      file="L_SHOULDER_P_S-434d0468624090c4914e0c6df00e341f0e4408f1.obj" />
+    <mesh name="L_SHOULDER_Y_vis" class="/"
+      file="L_SHOULDER_Y_S-1ae762a08029409918ea92cedbe0cd8402d01a09.obj" />
+    <mesh name="L_ELBOW_P_vis" class="/"
+      file="L_ELBOW_P_S-1ecb7cd0c14ddacd0d7cd921d403336a9754a38e.obj" />
+    <mesh name="L_ELBOW_Y_vis" class="/"
+      file="L_ELBOW_Y_S-d28468ff31ccc0fffdb67ae4f3112a7956cb919f.obj" />
+    <mesh name="L_WRIST_Y_vis" class="/"
+      file="L_WRIST_Y_S-3ec96115de95013dceb6697f287c953c44bf0242.obj" />
+    <mesh name="L_UTHUMB_vis" class="/"
+      file="L_UTHUMB_S-7970dcdf7fb3f0acf161b5d01e7e890a60bb923d.obj" />
+    <mesh name="L_LTHUMB_vis" class="/"
+      file="L_LTHUMB_S-f8a8dfbe3f7abc3ec7d7d3bcbc58d27d89c88138.obj" />
+    <mesh name="L_UINDEX_vis" class="/"
+      file="L_UINDEX_S-f7b6fac2c51e055ccf8e12d989f00356efc95bf5.obj" />
+    <mesh name="L_LINDEX_vis" class="/"
+      file="L_LINDEX_S-ba334bfe2361604ec74c0f1234f05ab491fb2922.obj" />
+    <mesh name="L_ULITTLE_vis" class="/"
+      file="L_ULITTLE_S-00ba0659834045d5227156d71a8bf4faaee9ace0.obj" />
+    <mesh name="L_LLITTLE_vis" class="/"
+      file="L_LLITTLE_S-5d6e8631d3ee6b8304ff94a7a4201ebda29c62e8.obj" />
+    <!-- texture png -->
+    <texture name="Map01" type="2d" file="Map01_siri-8142d536323f92da22d0f03e88bfa137cad50ad1.png" />
+    <texture name="Map03_F" type="2d" file="Map03_douF-eac99890d8784ecb2b1b3630cf9773e6910ea386.png" />
+    <texture name="Map03_R" type="2d" file="Map03_douR-46fe8b65e5e88d9fab166eee53575447f9b3bb9e.png" />
+    <texture name="Map05_F" type="2d"
+      file="Map05_atamaF-ac9ee49a4cfa547872fedf336bd24ca024ad6cc4.png" />
+    <texture name="Map05_R" type="2d"
+      file="Map05_atamaR-1f7cfc7220aae602464dd962b7db08eb74b03643.png" />
+    <texture name="Map06" type="2d"
+      file="Map06_migikata-e4bbe57706076a529be0aab74723ca6c3423c1e2.png" />
+    <texture name="Map07" type="2d"
+      file="Map07_migijowan-7a0dd5a28d00026ed11c033394a2ab0989804e5e.png" />
+    <texture name="Map08" type="2d"
+      file="Map08_migikawan-c00501c3a0544ede1387694a319d18a92ff3b13c.png" />
+    <texture name="Map09" type="2d"
+      file="Map09_migitekubi-9b9d73a2feb32693b06fd4878171346e17b3d809.png" />
+    <texture name="Map10" type="2d"
+      file="Map10_migitenohira-96d5d858b658533720cafea689eaf0f1af474930.png" />
+    <texture name="Map12" type="2d"
+      file="Map12_migiisshisaki-52d75ccb6815e5d4557889cab80fb937526f761b.png" />
+    <texture name="Map14" type="2d"
+      file="Map14_miginishisaki-eee1d6356d050ba5d7c93a9ea888f9a1f9593959.png" />
+    <texture name="Map28" type="2d"
+      file="Map28_migimata-420934d028c2e828cc58ac8d53251ffbeb93333a.png" />
+    <texture name="Map29" type="2d"
+      file="Map29_migidaitai-cc93417bcc315d6d8ab3c2509aca0cd35a2bd6ab.png" />
+    <texture name="Map30" type="2d"
+      file="Map30_migisune-849fc28cfb3f1a793a7586c39ec4b4fef5d71d78.png" />
+    <texture name="Map31" type="2d"
+      file="Map31_migiashikubi-ff4d9ead1611486e8e07832092192430f986aec7.png" />
+    <texture name="Map32" type="2d"
+      file="Map32_migiashi-293004a451456239351d40079799680ca52e6394.png" />
+    <!-- materials -->
+    <material name="PELVIS" class="/" texture="Map01" specular="1" shininess="1" />
+    <material name="WAIST_R_F" class="/" texture="Map03_F" specular="1" shininess="1" />
+    <material name="WAIST_R_R" class="/" texture="Map03_R" specular="1" shininess="1" />
+    <material name="NECK_P_F" class="/" texture="Map05_F" specular="1" shininess="1" />
+    <material name="NECK_P_R" class="/" texture="Map05_R" specular="1" shininess="1" />
+    <material name="SHOULDER_P" class="/" texture="Map06" specular="1" shininess="1" />
+    <material name="SHOULDER_Y" class="/" texture="Map07" specular="1" shininess="1" />
+    <material name="ELBOW_P" class="/" texture="Map08" specular="1" shininess="1" />
+    <material name="ELBOW_Y" class="/" texture="Map09" specular="1" shininess="1" />
+    <material name="WRIST_Y" class="/" texture="Map10" specular="1" shininess="1" />
+    <material name="THUMB" class="/" texture="Map12" specular="1" shininess="1" />
+    <material name="LITTLE" class="/" texture="Map14" specular="1" shininess="1" />
+    <material name="INDEX" class="/" texture="Map14" specular="1" shininess="1" />
+    <material name="HIP_R" class="/" texture="Map28" specular="1" shininess="1" />
+    <material name="HIP_Y" class="/" texture="Map29" specular="1" shininess="1" />
+    <material name="KNEE1" class="/" texture="Map30" specular="1" shininess="1" />
+    <material name="KNEE2" class="/" texture="Map31" specular="1" shininess="1" />
+    <material name="ANKLE" class="/" texture="Map32" specular="1" shininess="1" />
+  </asset>
+
+  <worldbody>
+    <!-- world light -->
+    <light name="light_0" class="/" directional="true" pos="0 0 1.5" dir="0 0 -1" />
+    <geom name="floor" class="/" type="plane" size="0 0 0.25" material="groundplane" />
+    <light name="light_1" class="/" directional="false" castshadow="false" pos="0 0 2"
+      dir="0 0 -1" diffuse="0.2 0.2 0.2" specular="0 0 0" />
+    <light name="light_2" class="/" mode="targetbodycom" target="PELVIS_S"
+      directional="false" pos="0 0 4" dir="0 0 -1" diffuse="0.8 0.8 0.8" specular="0.3 0.3 0.3" />
+    
+    <!-- body -->
+    <!-- pelvis -->
+    <body name="PELVIS_S" pos="0 0 1.4">
+      <freejoint name="root" />
+      <geom class="collision" quat="0.707105 0 0 0.707108" mesh="PELVIS_col" />
+      <geom name="PELVIS_S-geom-1" class="visual" material="PELVIS" quat="0.7071 0 0 0.70711"
+        mesh="PELVIS_vis" />
+      <inertial pos="-0.01 0 0.034" mass="10" diaginertia="0.089583 0.089583 0.1125" />
+      <!-- site for root imu sensor -->
+      <site name="imu" class="/" size="0.01" pos="0 0 0" />
+      <body name="R_HIP_P_S" pos="0 -0.096 0">
+        <inertial pos="0 0 0" mass="1" diaginertia="0.00196 0.00196 0.00196" />
+        <joint name="R_HIP_P" class="/" axis="0 1 0" range="-2.0944 0.7854" armature="0.1925" />
+        <body name="R_HIP_R_S" pos="0 0 0">
+          <inertial pos="0 0 0" mass="1" diaginertia="0.00196 0.00196 0.00196" />
+          <joint name="R_HIP_R" class="/" axis="1 0 0" range="-0.7854 0.34907" armature="0.1813" />
+          <geom name="R_HIP_R_S-geom-0" class="collision" quat="0.7071 0 0 0.70711"
+            mesh="R_HIP_R_col" />
+          <geom name="R_HIP_R_S-geom-1" class="visual" material="HIP_R" quat="0.7071 0 0 0.70711"
+            mesh="R_HIP_R_vis" />
+          <body name="R_HIP_Y_S" pos="0 0 0">
+            <inertial pos="0.01 0 -0.22" quat="0.70711 0 0 0.70711" mass="3"
+              diaginertia="0.034525 0.031925 0.00865" />
+            <joint name="R_HIP_Y" class="/" axis="0 0 1" range="-0.5236 0.7854" armature="0.1237" />
+            <geom name="R_HIP_Y_S-geom-0" class="collision" quat="0.7071 0 0 0.70711"
+              mesh="R_HIP_Y_col" />
+            <geom name="R_HIP_Y_S-geom-1" class="visual" material="HIP_Y" quat="0.7071 0 0 0.70711"
+              mesh="R_HIP_Y_vis" />
+            <body name="R_KNEE_S" pos="-0.02 0 -0.389">
+              <inertial pos="0.04 0 -0.16" quat="0.70711 0 0 0.70711" mass="3"
+                diaginertia="0.034525 0.031925 0.00865" />
+              <joint name="R_KNEE" class="/" axis="0 1 0" range="0 2.618" armature="0.1305" />
+              <geom name="R_KNEE_S-geom-0" class="collision" mesh="R_KNEE_col" />
+              <geom name="R_KNEE_S-geom-1" class="visual" material="KNEE1" mesh="R_KNEE1_vis" />
+              <geom name="R_KNEE_S-geom-2" class="visual" material="KNEE2" mesh="R_KNEE2_vis" />
+              <body name="R_ANKLE_R_S" pos="0.04 0 -0.357">
+                <inertial pos="0 0 0" mass="1" diaginertia="0.00064 0.00064 0.00064" />
+                <joint name="R_ANKLE_R" class="/" axis="1 0 0" range="-0.61086 0.7854"
+                  armature="0.0653" />
+                <body name="R_ANKLE_P_S" pos="0 0 0">
+                  <inertial pos="0.03 0 -0.07" quat="0 0.70711 0 0.70711" mass="1.5"
+                    diaginertia="0.0062167 0.0056167 0.0014167" />
+                  <joint name="R_ANKLE_P" class="/" axis="0 1 0" range="-1.4835 0.95993"
+                    armature="0.1337" />
+                  <geom name="R_ANKLE_P_S-geom-1" class="visual" material="ANKLE"
+                    quat="0.7071 0 0 0.70711" mesh="R_ANKLE_P_vis" />
+                  <site name="rf_force" class="/" size="0.01" pos="0.03 0 -0.1" />
+                  <geom name="R_FOOT" class="collision" type="box" size="0.1 0.05 0.01"
+                    pos="0.029 0 -0.09778" rgba="1 0 0 1" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="L_HIP_P_S" pos="0 0.096 0">
+        <inertial pos="0 0 0" mass="1" diaginertia="0.00196 0.00196 0.00196" />
+        <joint name="L_HIP_P" class="/" axis="0 1 0" range="-2.0944 0.7854" armature="0.1925" />
+        <body name="L_HIP_R_S" pos="0 0 0">
+          <inertial pos="0 0 0" mass="1" diaginertia="0.00196 0.00196 0.00196" />
+          <joint name="L_HIP_R" class="/" axis="1 0 0" range="-0.34907 0.7854" armature="0.1813" />
+          <geom name="L_HIP_R_S-geom-0" class="collision" quat="0.7071 0 0 0.70711"
+            mesh="L_HIP_R_col" />
+          <geom name="L_HIP_R_S-geom-1" class="visual" material="HIP_R" quat="0.7071 0 0 0.70711"
+            mesh="L_HIP_R_vis" />
+          <body name="L_HIP_Y_S" pos="0 0 0">
+            <inertial pos="0.01 0 -0.22" quat="0.70711 0 0 0.70711" mass="3"
+              diaginertia="0.034525 0.031925 0.00865" />
+            <joint name="L_HIP_Y" class="/" axis="0 0 1" range="-0.7854 0.5236" armature="0.1237" />
+            <geom name="L_HIP_Y_S-geom-0" class="collision" quat="0.7071 0 0 0.70711"
+              mesh="L_HIP_Y_col" />
+            <geom name="L_HIP_Y_S-geom-1" class="visual" material="HIP_Y" quat="0.7071 0 0 0.70711"
+              mesh="L_HIP_Y_vis" />
+            <body name="L_KNEE_S" pos="-0.02 0 -0.389">
+              <inertial pos="0.04 0 -0.16" quat="0.70711 0 0 0.70711" mass="3"
+                diaginertia="0.034525 0.031925 0.00865" />
+              <joint name="L_KNEE" class="/" axis="0 1 0" range="0 2.618" armature="0.1305" />
+              <geom name="L_KNEE_S-geom-0" class="collision" mesh="L_KNEE_col" />
+              <geom name="L_KNEE_S-geom-1" class="visual" material="KNEE1" mesh="L_KNEE1_vis" />
+              <geom name="L_KNEE_S-geom-2" class="visual" material="KNEE2" mesh="L_KNEE2_vis" />
+              <body name="L_ANKLE_R_S" pos="0.04 0 -0.357">
+                <inertial pos="0 0 0" mass="1" diaginertia="0.00064 0.00064 0.00064" />
+                <joint name="L_ANKLE_R" class="/" axis="1 0 0" range="-0.7854 0.61086"
+                  armature="0.0653" />
+                <body name="L_ANKLE_P_S" pos="0 0 0">
+                  <inertial pos="0.03 0 -0.07" quat="0 0.70711 0 0.70711" mass="1.5"
+                    diaginertia="0.0062167 0.0056167 0.0014167" />
+                  <joint name="L_ANKLE_P" class="/" axis="0 1 0" range="-1.4835 0.95993"
+                    armature="0.1337" />
+                  <geom name="L_ANKLE_P_S-geom-1" class="visual" material="ANKLE"
+                    quat="0.7071 0 0 0.70711" mesh="L_ANKLE_P_vis" />
+                  <site name="lf_force" class="/" size="0.01" pos="0.03 0 -0.1" />
+                  <geom name="L_FOOT" class="collision" type="box" size="0.1 0.05 0.01"
+                    pos="0.029 0 -0.09778" rgba="0 0 1 1" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="WAIST_Y_S" pos="0 0 0.192">
+        <inertial pos="0 0 -0.07" quat="0.5 0.5 -0.5 0.5" mass="1"
+          diaginertia="0.0032 0.0017333 0.0017333" />
+        <geom name="WAIST_Y_S-geom-1" class="visual" quat="0.7071 0 0 0.70711" mesh="WAIST_Y_vis" />
+        <body name="WAIST_P_S" pos="0 0 0">
+          <inertial pos="0 0 0" mass="1" diaginertia="0.00245 0.002425 0.002425" />
+          <body name="WAIST_R_S" pos="0 0 0">
+            <inertial pos="0.02 0 0.24" quat="0.70711 0.70711 0 0" mass="10"
+              diaginertia="0.15708 0.13667 0.10108" />
+            <geom name="WAIST_R_S-geom-1" class="visual" material="WAIST_R_F" mesh="WAIST_R_F_vis" />
+            <geom name="WAIST_R_S-geom-2" class="visual" material="WAIST_R_R" mesh="WAIST_R_R_vis" />
+            <body name="NECK_Y_S" pos="-0.003 0 0.453">
+              <inertial pos="0 0 -0.05" mass="0.5" diaginertia="0.00072917 0.00072917 0.000625" />
+              <geom name="NECK_Y_S-geom-1" class="visual" quat="0.7071 0 0 0.70711"
+                mesh="NECK_Y_vis" />
+              <body name="NECK_R_S" pos="0 0 0">
+                <inertial pos="0 0 0" mass="0.5" diaginertia="0.0005 0.0005 0.0005" />
+                <body name="NECK_P_S" pos="0 0 0">
+                  <inertial pos="0.01 0 0.11" mass="2" diaginertia="0.00968 0.00968 0.00968" />
+                  <geom name="NECK_P_S-geom-1" class="visual" material="NECK_P_F"
+                    mesh="NECK_P_F_vis" />
+                  <geom name="NECK_P_S-geom-2" class="visual" material="NECK_P_R"
+                    mesh="NECK_P_R_vis" />
+                </body>
+              </body>
+            </body>
+            <body name="R_SHOULDER_P_S" pos="0 -0.24 0.33">
+              <inertial pos="0 0 0" mass="1" diaginertia="0.00196 0.00196 0.00196" />
+              <joint name="R_SHOULDER_P" class="/" axis="0 1 0" range="-3.1416 1.0472"
+                armature="0.121" />
+              <geom name="R_SHOULDER_P_S-geom-1" class="visual" material="SHOULDER_P"
+                quat="0.7071 0 0 0.70711" mesh="R_SHOULDER_P_vis" />
+              <body name="R_SHOULDER_R_S" pos="0 0 0">
+                <inertial pos="0 0 0" mass="1" diaginertia="0.00196 0.00196 0.00196" />
+                <joint name="R_SHOULDER_R" class="/" axis="1 0 0" range="-1.7453 0.17453"
+                  armature="0.121" />
+                <body name="R_SHOULDER_Y_S" pos="0 0 0">
+                  <inertial pos="-0.01 0 -0.19" quat="0.70711 0 0 0.70711" mass="2"
+                    diaginertia="0.0146 0.01365 0.00635" />
+                  <geom name="R_SHOULDER_Y_S-geom-1" class="visual" material="SHOULDER_Y"
+                    quat="0.7071 0 0 0.70711" mesh="R_SHOULDER_Y_vis" />
+                  <body name="R_ELBOW_P_S" pos="0.004 0 -0.305">
+                    <inertial pos="-0.02 0 -0.1" mass="1" diaginertia="0.010675 0.010675 0.0027" />
+                    <joint name="R_ELBOW_P" class="/" axis="0 1 0" range="-2.5307 0"
+                      armature="0.1054" />
+                    <geom name="R_ELBOW_P_S-geom-1" class="visual" material="ELBOW_P"
+                      quat="0.7071 0 0 0.70711" mesh="R_ELBOW_P_vis" />
+                    <body name="R_ELBOW_Y_S" pos="-0.004 0 -0.239">
+                      <inertial pos="0 0 0" mass="1" diaginertia="0.00064 0.00064 0.00064" />
+                      <geom name="R_ELBOW_Y_S-geom-1" class="visual" material="ELBOW_Y"
+                        quat="0.7071 0 0 0.70711" mesh="R_ELBOW_Y_vis" />
+                      <body name="R_WRIST_R_S" pos="0 0 0">
+                        <inertial pos="0 0 0" mass="0.5" diaginertia="0.00032 0.00032 0.00032" />
+                        <body name="R_WRIST_Y_S" pos="0 0 0">
+                          <inertial pos="0 0.01 -0.06" quat="0.70711 0 0 0.70711" mass="0.5"
+                            diaginertia="0.0007625 0.0004625 0.0004625" />
+                          <geom name="R_WRIST_Y_S-geom-1" class="visual" material="WRIST_Y"
+                            quat="0.7071 0 0 0.70711" mesh="R_WRIST_Y_vis" />
+                          <site name="rh_force" class="/" size="0.01" pos="0 0 0" />
+                          <body name="R_UTHUMB_S" pos="0 0.033 -0.084">
+                            <inertial pos="0 0 -0.015" mass="0.2"
+                              diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                            <geom name="R_UTHUMB_S-geom-1" class="visual" quat="0.7071 0 0 0.70711"
+                              mesh="R_UTHUMB_vis" />
+                            <body name="R_LTHUMB_S" pos="0 0 -0.045">
+                              <inertial pos="0 0 -0.015" mass="0.2"
+                                diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                              <geom name="R_LTHUMB_S-geom-1" class="visual" material="THUMB"
+                                quat="0.7071 0 0 0.70711" mesh="R_LTHUMB_vis" />
+                            </body>
+                          </body>
+                          <body name="R_UINDEX_S" pos="0.025 -0.016 -0.084">
+                            <inertial pos="0 0 -0.015" mass="0.2"
+                              diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                            <geom name="R_UINDEX_S-geom-1" class="visual" quat="0.7071 0 0 0.70711"
+                              mesh="R_UINDEX_vis" />
+                            <body name="R_LINDEX_S" pos="0 0 -0.045">
+                              <inertial pos="0 0 -0.015" mass="0.2"
+                                diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                              <geom name="R_LINDEX_S-geom-1" class="visual" material="INDEX"
+                                quat="0.7071 0 0 0.70711" mesh="R_LINDEX_vis" />
+                            </body>
+                          </body>
+                          <body name="R_ULITTLE_S" pos="-0.025 -0.016 -0.084">
+                            <inertial pos="0 0 -0.015" mass="0.2"
+                              diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                            <geom name="R_ULITTLE_S-geom-1" class="visual" quat="0.7071 0 0 0.70711"
+                              mesh="R_ULITTLE_vis" />
+                            <body name="R_LLITTLE_S" pos="0 0 -0.045">
+                              <inertial pos="0 0 -0.015" mass="0.2"
+                                diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                              <geom name="R_LLITTLE_S-geom-1" class="visual" material="LITTLE"
+                                quat="0.7071 0 0 0.70711" mesh="R_LLITTLE_vis" />
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+            <body name="L_SHOULDER_P_S" pos="0 0.24 0.33">
+              <inertial pos="0 0 0" mass="1" diaginertia="0.00196 0.00196 0.00196" />
+              <joint name="L_SHOULDER_P" class="/" axis="0 1 0" range="-3.1416 1.0472"
+                armature="0.121" />
+              <geom name="L_SHOULDER_P_S-geom-1" class="visual" material="SHOULDER_P"
+                quat="0.7071 0 0 0.70711" mesh="L_SHOULDER_P_vis" />
+              <body name="L_SHOULDER_R_S" pos="0 0 0">
+                <inertial pos="0 0 0" mass="1" diaginertia="0.00196 0.00196 0.00196" />
+                <joint name="L_SHOULDER_R" class="/" axis="1 0 0" range="-0.17453 1.7453"
+                  armature="0.121" />
+                <body name="L_SHOULDER_Y_S" pos="0 0 0">
+                  <inertial pos="-0.01 0 -0.19" quat="0.70711 0 0 0.70711" mass="2"
+                    diaginertia="0.0146 0.01365 0.00635" />
+                  <geom name="L_SHOULDER_Y_S-geom-1" class="visual" material="SHOULDER_Y"
+                    quat="0.7071 0 0 0.70711" mesh="L_SHOULDER_Y_vis" />
+                  <body name="L_ELBOW_P_S" pos="0.004 0 -0.305">
+                    <inertial pos="-0.02 0 -0.1" mass="1" diaginertia="0.010675 0.010675 0.0027" />
+                    <joint name="L_ELBOW_P" class="/" axis="0 1 0" range="-2.5307 0"
+                      armature="0.1054" />
+                    <geom name="L_ELBOW_P_S-geom-1" class="visual" material="ELBOW_P"
+                      quat="0.7071 0 0 0.70711" mesh="L_ELBOW_P_vis" />
+                    <body name="L_ELBOW_Y_S" pos="-0.004 0 -0.239">
+                      <inertial pos="0 0 0" mass="1" diaginertia="0.00064 0.00064 0.00064" />
+                      <geom name="L_ELBOW_Y_S-geom-1" class="visual" material="ELBOW_Y"
+                        quat="0.7071 0 0 0.70711" mesh="L_ELBOW_Y_vis" />
+                      <body name="L_WRIST_R_S" pos="0 0 0">
+                        <inertial pos="0 0 0" mass="0.5" diaginertia="0.00032 0.00032 0.00032" />
+                        <body name="L_WRIST_Y_S" pos="0 0 0">
+                          <inertial pos="0 -0.01 -0.06" quat="0.70711 0 0 0.70711" mass="0.5"
+                            diaginertia="0.0007625 0.0004625 0.0004625" />
+                          <geom name="L_WRIST_Y_S-geom-1" class="visual" material="WRIST_Y"
+                            quat="0.7071 0 0 0.70711" mesh="L_WRIST_Y_vis" />
+                          <site name="lh_force" class="/" size="0.01" pos="0 0 0" />
+                          <body name="L_UTHUMB_S" pos="0 -0.033 -0.084">
+                            <inertial pos="0 0 -0.015" mass="0.2"
+                              diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                            <geom name="L_UTHUMB_S-geom-1" class="visual" quat="0.7071 0 0 0.70711"
+                              mesh="L_UTHUMB_vis" />
+                            <body name="L_LTHUMB_S" pos="0 0 -0.045">
+                              <inertial pos="0 0 -0.015" mass="0.2"
+                                diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                              <geom name="L_LTHUMB_S-geom-1" class="visual" material="THUMB"
+                                quat="0.7071 0 0 0.70711" mesh="L_LTHUMB_vis" />
+                            </body>
+                          </body>
+                          <body name="L_UINDEX_S" pos="0.025 0.016 -0.084">
+                            <inertial pos="0 0 -0.015" mass="0.2"
+                              diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                            <geom name="L_UINDEX_S-geom-1" class="visual" quat="0.7071 0 0 0.70711"
+                              mesh="L_UINDEX_vis" />
+                            <body name="L_LINDEX_S" pos="0 0 -0.045">
+                              <inertial pos="0 0 -0.015" mass="0.2"
+                                diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                              <geom name="L_LINDEX_S-geom-1" class="visual" material="INDEX"
+                                quat="0.7071 0 0 0.70711" mesh="L_LINDEX_vis" />
+                            </body>
+                          </body>
+                          <body name="L_ULITTLE_S" pos="-0.025 0.016 -0.084">
+                            <inertial pos="0 0 -0.015" mass="0.2"
+                              diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                            <geom name="L_ULITTLE_S-geom-1" class="visual" quat="0.7071 0 0 0.70711"
+                              mesh="L_ULITTLE_vis" />
+                            <body name="L_LLITTLE_S" pos="0 0 -0.045">
+                              <inertial pos="0 0 -0.015" mass="0.2"
+                                diaginertia="6.1667e-05 6.1667e-05 2.6667e-05" />
+                              <geom name="L_LLITTLE_S-geom-1" class="visual" material="LITTLE"
+                                quat="0.7071 0 0 0.70711" mesh="L_LLITTLE_vis" />
+                            </body>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+  </worldbody>
+  <contact>
+    <exclude name="//unnamed_contact_0" body1="R_KNEE_S" body2="R_ANKLE_P_S" />
+    <exclude name="//unnamed_contact_1" body1="L_KNEE_S" body2="L_ANKLE_P_S" />
+  </contact>
+  <equality>
+    <joint name="//unnamed_equality_0" class="/" joint1="R_SHOULDER_P" polycoef="-0.052 0 0 0 0" />
+    <joint name="//unnamed_equality_1" class="/" joint1="R_SHOULDER_R" polycoef="-0.169 0 0 0 0" />
+    <joint name="//unnamed_equality_2" class="/" joint1="R_ELBOW_P" polycoef="-0.523 0 0 0 0" />
+    <joint name="//unnamed_equality_3" class="/" joint1="L_SHOULDER_P" polycoef="-0.052 0 0 0 0" />
+    <joint name="//unnamed_equality_4" class="/" joint1="L_SHOULDER_R" polycoef="0.169 0 0 0 0" />
+    <joint name="//unnamed_equality_5" class="/" joint1="L_ELBOW_P" polycoef="-0.523 0 0 0 0" />
+  </equality>
+  <actuator>
+    <motor name="R_HIP_P_motor" class="/" joint="R_HIP_P" />
+    <motor name="R_HIP_R_motor" class="/" joint="R_HIP_R" />
+    <motor name="R_HIP_Y_motor" class="/" joint="R_HIP_Y" />
+    <motor name="R_KNEE_motor" class="/" joint="R_KNEE" />
+    <motor name="R_ANKLE_R_motor" class="/" joint="R_ANKLE_R" />
+    <motor name="R_ANKLE_P_motor" class="/" joint="R_ANKLE_P" />
+    <motor name="L_HIP_P_motor" class="/" joint="L_HIP_P" />
+    <motor name="L_HIP_R_motor" class="/" joint="L_HIP_R" />
+    <motor name="L_HIP_Y_motor" class="/" joint="L_HIP_Y" />
+    <motor name="L_KNEE_motor" class="/" joint="L_KNEE" />
+    <motor name="L_ANKLE_R_motor" class="/" joint="L_ANKLE_R" />
+    <motor name="L_ANKLE_P_motor" class="/" joint="L_ANKLE_P" />
+  </actuator>
+  <sensor>
+    <force name="RightFootForceSensor_fsensor" site="rf_force" />
+    <torque name="RightFootForceSensor_tsensor" site="rf_force" />
+    <force name="LeftFootForceSensor_fsensor" site="lf_force" />
+    <torque name="LeftFootForceSensor_tsensor" site="lf_force" />
+    <force name="RightHandForceSensor_fsensor" site="rh_force" />
+    <torque name="RightHandForceSensor_tsensor" site="rh_force" />
+    <force name="LeftHandForceSensor_fsensor" site="lh_force" />
+    <torque name="LeftHandForceSensor_tsensor" site="lh_force" />
+    <gyro name="Accelerometer_gyro" site="imu" />
+    <accelerometer name="Accelerometer_accelerometer" site="imu" />
+  </sensor>
+</mujoco>

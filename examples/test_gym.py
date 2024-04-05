@@ -6,13 +6,15 @@ import olympic_mujoco
 import gymnasium as gym
 
 
-env = gym.make("OlympicMujoco", env_name="StickFigureA1.run")
+# env = gym.make("OlympicMujoco", env_name="StickFigureA1.run")
 # env = gym.make("OlympicMujoco", env_name="UnitreeH1.run")
+env = gym.make("OlympicMujoco", env_name="Jvrc.run")
 
-print(type(env))
+
+# print(type(env))
 
 # 假设 env 是一个 OrderEnforcing 包装器类的实例
-print(type(env.unwrapped))  # 获取原始未被包装的环境
+# print(type(env.unwrapped))  # 获取原始未被包装的环境
 
 
 action_dim = env.action_space.shape[0]

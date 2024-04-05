@@ -147,7 +147,7 @@ class LocoEnvBase(MultiMuJoCo):
         )
 
         # 指定奖励函数
-        self._reward_function = self._get_reward_function(reward_type, reward_params)
+        # self._reward_function = self._get_reward_function(reward_type, reward_params)
         # 选择是否使用足部力在观察空间中
         self._use_foot_forces = use_foot_forces
         # 设置观察空间为使用_get_observation_space方法返回的Box空间
@@ -537,7 +537,7 @@ class LocoEnvBase(MultiMuJoCo):
         """
 
         # 重置奖励函数的状态
-        self._reward_function.reset_state()
+        # self._reward_function.reset_state()
 
         # 如果提供了观测值obs，则从obs初始化模拟
         if obs is not None:
@@ -712,8 +712,8 @@ class LocoEnvBase(MultiMuJoCo):
         Calls the reward function of the environment.
 
         """
-
-        return self._reward_function(state, action, next_state, absorbing)
+        return None
+        # return self._reward_function(state, action, next_state, absorbing)
 
     def _get_reward_function(self, reward_type, reward_params):
         """
@@ -731,12 +731,19 @@ class LocoEnvBase(MultiMuJoCo):
         if reward_type == "custom":
             reward_func = CustomReward(**reward_params)
         elif reward_type == "target_velocity":
+            # TODO:这里要 dq_pelvis_tx 干什么
             x_vel_idx = self.get_obs_idx("dq_pelvis_tx")
+            print("--------------------------------------------")
+            print("x_vel_idx = ",x_vel_idx)
+            print("--------------------------------------------")
             assert len(x_vel_idx) == 1
             x_vel_idx = x_vel_idx[0]
             reward_func = TargetVelocityReward(x_vel_idx=x_vel_idx, **reward_params)
         elif reward_type == "x_pos":
             x_idx = self.get_obs_idx("q_pelvis_tx")
+            print("--------------------------------------------")
+            print("x_vel_idx = ",x_vel_idx)
+            print("--------------------------------------------")
             assert len(x_idx) == 1
             x_idx = x_idx[0]
             reward_func = PosReward(pos_idx=x_idx)
