@@ -142,8 +142,6 @@ class BaseHumanoidRobot(LocoEnvBase):
 
         """
 
-        print("base_robot generate")
-
         # Generate the MDP based on the specified task
         # TODO：这里实际上是触发real_robot层的__init__函数
         if task == "walk":

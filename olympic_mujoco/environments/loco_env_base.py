@@ -5,6 +5,7 @@ from pathlib import Path
 from copy import deepcopy
 from tempfile import mkdtemp
 from itertools import product
+import transforms3d as tf3
 
 from dm_control import mjcf
 
@@ -20,6 +21,11 @@ from olympic_mujoco.utils import Trajectory
 from olympic_mujoco.utils import NoReward, CustomReward, TargetVelocityReward, PosReward
 
 from olympic_mujoco.interfaces.mujoco_robot_interface import MujocoRobotInterface
+
+from olympic_mujoco.enums.enums import AlgorithmType
+
+import mujoco_viewer
+
 
 class LocoEnvBase(MultiMuJoCo):
     """
@@ -49,6 +55,7 @@ class LocoEnvBase(MultiMuJoCo):
         parallel_dom_rand=True,
         N_worker_per_xml_dom_rand=4,
         train_start=False,
+        algorithm_type: AlgorithmType=AlgorithmType.REINFORCEMENT_LEARNING,
         sim_dt=0.0025,
         control_dt=0.025,
         **viewer_params
@@ -102,6 +109,17 @@ class LocoEnvBase(MultiMuJoCo):
         self._sim_dt=sim_dt
         self._train_start=train_start
 
+
+        # TODO: viewer相关代码 有待修改
+        self.viewer = None
+
+        # TODO：区分算法的类型
+        # TODO：这里传递参数的方式存在问题，make()中应该想办法包含这个类型
+        self._algorithm_type=algorithm_type
+
+        print("***************************")
+        print("self._algorithm_type = ",self._algorithm_type)
+        print("***************************")
 
         if type(xml_handles) != list:
             xml_handles = [xml_handles]
@@ -194,6 +212,62 @@ class LocoEnvBase(MultiMuJoCo):
         # print("--------------------------------------------")
         # print(self.mujoco_interface.test())
 
+    # ***********************************************************************************************************
+
+    def reset_model(self):
+        """
+        Reset the robot degrees of freedom (qpos and qvel).
+        Implement this in each subclass.
+        """
+        raise NotImplementedError
+    
+    def test_reset(self):
+        print("这里调用的是test_reset")
+        mujoco.mj_resetData(self._model, self._data)
+        ob = self.reset_model()
+        return ob
+    
+    # better render 这个实际上和原生的内嵌render基本上一模一样，但是多了一个self.viewer_setup()
+    def test_render(self):
+        if self.viewer is None:
+            self.viewer = mujoco_viewer.MujocoViewer(self._model, self._data)
+            self.viewer_setup()
+        self.viewer.render()
+
+    # ***********************************************************************************************************
+
+    def viewer_setup(self):
+        """
+        This method is called when the viewer is initialized.
+        Optionally implement this method, if you need to tinker with camera position
+        and so forth.
+        """
+        self.viewer.cam.trackbodyid = 1
+        self.viewer.cam.distance = self._model.stat.extent * 1.5
+        self.viewer.cam.lookat[2] = 1.5
+        self.viewer.cam.lookat[0] = 2.0
+        self.viewer.cam.elevation = -20
+        self.viewer.vopt.geomgroup[0] = 1
+        self.viewer._render_every_frame = True
+
+    def viewer_is_paused(self):
+        return self.viewer._paused
+
+    def uploadGPU(self, hfieldid=None, meshid=None, texid=None):
+        # hfield
+        if hfieldid is not None:
+            mujoco.mjr_uploadHField(self._model, self.viewer.ctx, hfieldid)
+        # mesh
+        if meshid is not None:
+            mujoco.mjr_uploadMesh(self._model, self.viewer.ctx, meshid)
+        # texture
+        if texid is not None:
+            mujoco.mjr_uploadTexture(self._model, self.viewer.ctx, texid)
+
+    def close(self):
+        if self.viewer is not None:
+            self.viewer.close()
+            self.viewer = None
 
     #---------------------------------------------------------------------------------------------------------
     #----------------------------------------- 轨迹的加载与播放 ----------------------------------------------
@@ -523,6 +597,12 @@ class LocoEnvBase(MultiMuJoCo):
             self._viewer.load_new_model(self._model)
 
         self._obs = self._create_observation(self.obs_helper._build_obs(self._data))
+
+        print("**********************************")
+        print("len(self._obs) = ",len(self._obs))
+        print("**********************************")
+
+
         return self._modify_observation(self._obs)
 
     def setup(self, obs):
@@ -759,6 +839,47 @@ class LocoEnvBase(MultiMuJoCo):
     #---------------------------------------------------------------------------------------------------------
 
 
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- xml操作(也相当于是对观测空间的操作) ----------------------------------------------
+    #---------------------------------------------------------------------------------------------------------
+
+    @staticmethod
+    def _delete_from_xml_handle(xml_handle, joints_to_remove, motors_to_remove, equ_constraints):
+        """
+        Deletes certain joints, motors and equality constraints from a Mujoco XML handle.
+
+        Args:
+            xml_handle: Handle to Mujoco XML.
+            joints_to_remove (list): List of joint names to remove.
+            motors_to_remove (list): List of motor names to remove.
+            equ_constraints (list): List of equality constraint names to remove.
+
+        Returns:
+            Modified Mujoco XML handle.
+
+        """
+
+        for j in joints_to_remove:
+            j_handle = xml_handle.find("joint", j)
+            j_handle.remove()
+        for m in motors_to_remove:
+            m_handle = xml_handle.find("actuator", m)
+            m_handle.remove()
+        for e in equ_constraints:
+            e_handle = xml_handle.find("equality", e)
+            e_handle.remove()
+
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        for joint in xml_handle.find_all('joint'):
+            # 打印每个关节的名称
+            print(joint.name)
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        
+        return xml_handle
+    #---------------------------------------------------------------------------------------------------------
+
+
+
     # TODO:这个函数不应该在这里
     def set_state(self, qpos, qvel):
         # 设置模型的状态，包括位置和速度
@@ -766,18 +887,6 @@ class LocoEnvBase(MultiMuJoCo):
         self._data.qpos[:] = qpos
         self._data.qvel[:] = qvel
         mujoco.mj_forward(self._model, self._data)
-
-    def uploadGPU(self, hfieldid=None, meshid=None, texid=None):
-        # 上传模型数据到GPU
-        # hfield
-        if hfieldid is not None:
-            mujoco.mjr_uploadHField(self._model, self._viewer.ctx, hfieldid)
-        # mesh
-        if meshid is not None:
-            mujoco.mjr_uploadMesh(self._model, self._viewer.ctx, meshid)
-        # texture
-        if texid is not None:
-            mujoco.mjr_uploadTexture(self._model, self._viewer.ctx, texid)
 
 
     def _setup_ground_force_statistics(self):
@@ -927,7 +1036,7 @@ class LocoEnvBase(MultiMuJoCo):
 
         """
         env_name = cls.__name__
-        print("register  env_name = ", env_name)
+        # print("register  env_name = ", env_name)
 
         if env_name not in Environment._registered_envs:
             Environment._registered_envs[env_name] = cls

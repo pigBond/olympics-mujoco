@@ -19,6 +19,7 @@ get_motor_speed_limits(): 获取执行器的速度限制。
 get_act_joint_speed_limits(): 获取关节的速度限制。
 get_gear_ratios(): 获取传动比。
 get_motor_names(): 获取执行器的名称列表。
+get_joint_names(): 获取joint的名称列表。
 get_actuated_joint_inds(): 获取与执行器连接的关节索引列表。
 get_actuated_joint_names(): 获取与执行器连接的关节名称列表。
 get_motor_qposadr(): 获取所有驱动关节的配置状态地址列表。
@@ -137,6 +138,10 @@ class MujocoRobotInterface(object):
     def get_motor_names(self):
         actuator_names = [mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i) for i in range(self.model.nu)]
         return actuator_names
+    
+    def get_joint_names(self):
+        joint_names = [mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i) for i in range(self.model.njnt)]
+        return joint_names
 
     def get_actuated_joint_inds(self):
         """

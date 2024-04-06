@@ -66,7 +66,9 @@ TODO: 所以后续尝试修改模型的加载方式
 
 
 
-
+```
+python -m mujoco.viewer --mjcf=
+```
 
 
 
@@ -107,9 +109,27 @@ self.model = mujoco.MjModel.from_xml_path(fullpath)
 
 
 
+### 区分模仿学习和强化学习的实现
 
 
 
+```python
+from enum import Enum, auto
+
+class AlgorithmType(Enum):
+    REINFORCEMENT_LEARNING = auto()
+    IMITATION_LEARNING = auto()
+```
+
+```python
+ self.algorithm_type = algorithm_type
+ if self.algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
+	self.setup_for_reinforcement_learning()
+ elif self.algorithm_type == AlgorithmType.IMITATION_LEARNING:
+     self.setup_for_imitation_learning()
+ else:
+     raise ValueError("Unsupported algorithm type")
+```
 
 
 

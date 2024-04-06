@@ -19,7 +19,9 @@ def experiment(seed=0):
 
     # mdp = LocoEnv.make("TestHumanoid.run.perfect")
     # mdp = LocoEnvBase.make("UnitreeH1.run.perfect")
+    # mdp = LocoEnvBase.make("StickFigureA1.run.real")
     mdp = LocoEnvBase.make("Jvrc.run.real")
+
 
     mdp.play_trajectory_from_velocity(n_episodes=3, n_steps_per_episode=500)
 

@@ -518,6 +518,7 @@
         </body>
       </body>
     </body>
+
     <geom name="box01" class="collision" type="box" group="0" size="1 1 0.1" pos="0 0 -0.2"/>
     <geom name="box02" class="collision" type="box" group="0" size="1 1 0.1" pos="0 0 -0.2"/>
     <geom name="box03" class="collision" type="box" group="0" size="1 1 0.1" pos="0 0 -0.2"/>
@@ -539,7 +540,22 @@
     <geom name="box19" class="collision" type="box" group="0" size="1 1 0.1" pos="0 0 -0.2"/>
     <geom name="box20" class="collision" type="box" group="0" size="1 1 0.1" pos="0 0 -0.2"/>
   </worldbody>
-  
+
+  <equality>
+    <!-- mimic joints for right gripper -->
+    <joint joint1="R_LTHUMB" joint2="R_UTHUMB" polycoef="0 3 0 0 0" />
+    <joint joint1="R_UINDEX" joint2="R_UTHUMB" polycoef="0 -1 0 0 0" />
+    <joint joint1="R_LINDEX" joint2="R_UTHUMB" polycoef="0 -3 0 0 0" />
+    <joint joint1="R_ULITTLE" joint2="R_UTHUMB" polycoef="0 -1 0 0 0" />
+    <joint joint1="R_LLITTLE" joint2="R_UTHUMB" polycoef="0 -3 0 0 0" />
+    <!-- mimic joints for left gripper -->
+    <joint joint1="L_LTHUMB" joint2="L_UTHUMB" polycoef="0 3 0 0 0" />
+    <joint joint1="L_UINDEX" joint2="L_UTHUMB" polycoef="0 -1 0 0 0" />
+    <joint joint1="L_LINDEX" joint2="L_UTHUMB" polycoef="0 -3 0 0 0" />
+    <joint joint1="L_ULITTLE" joint2="L_UTHUMB" polycoef="0 -1 0 0 0" />
+    <joint joint1="L_LLITTLE" joint2="L_UTHUMB" polycoef="0 -3 0 0 0" />
+  </equality>
+
   <actuator>
     <!-- right leg -->
     <motor name="R_HIP_P_motor" joint="R_HIP_P" />
@@ -555,32 +571,6 @@
     <motor name="L_KNEE_motor" joint="L_KNEE" />
     <motor name="L_ANKLE_R_motor" joint="L_ANKLE_R" />
     <motor name="L_ANKLE_P_motor" joint="L_ANKLE_P" />
-    <!-- waist -->
-    <motor name="WAIST_Y_motor" joint="WAIST_Y" />
-    <motor name="WAIST_P_motor" joint="WAIST_P" />
-    <motor name="WAIST_R_motor" joint="WAIST_R" />
-    <!-- head -->
-    <motor name="NECK_Y_motor" joint="NECK_Y" />
-    <motor name="NECK_R_motor" joint="NECK_R" />
-    <motor name="NECK_P_motor" joint="NECK_P" />
-    <!-- right arm -->
-    <motor name="R_SHOULDER_P_motor" joint="R_SHOULDER_P" />
-    <motor name="R_SHOULDER_R_motor" joint="R_SHOULDER_R" />
-    <motor name="R_SHOULDER_Y_motor" joint="R_SHOULDER_Y" />
-    <motor name="R_ELBOW_P_motor" joint="R_ELBOW_P" />
-    <motor name="R_ELBOW_Y_motor" joint="R_ELBOW_Y" />
-    <motor name="R_WRIST_R_motor" joint="R_WRIST_R" />
-    <motor name="R_WRIST_Y_motor" joint="R_WRIST_Y" />
-    <motor name="R_UTHUMB_motor" joint="R_UTHUMB" />
-    <!-- left arm -->
-    <motor name="L_SHOULDER_P_motor" joint="L_SHOULDER_P" />
-    <motor name="L_SHOULDER_R_motor" joint="L_SHOULDER_R" />
-    <motor name="L_SHOULDER_Y_motor" joint="L_SHOULDER_Y" />
-    <motor name="L_ELBOW_P_motor" joint="L_ELBOW_P" />
-    <motor name="L_ELBOW_Y_motor" joint="L_ELBOW_Y" />
-    <motor name="L_WRIST_R_motor" joint="L_WRIST_R" />
-    <motor name="L_WRIST_Y_motor" joint="L_WRIST_Y" />
-    <motor name="L_UTHUMB_motor" joint="L_UTHUMB" />
   </actuator>
 
   <sensor>
