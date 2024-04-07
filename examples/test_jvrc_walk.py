@@ -28,7 +28,7 @@ def run(env, policy):
     print("size = ",len(observation))
     print("********************")
 
-    env.test_render()
+    env.render()
     viewer = env.viewer
     viewer._paused = False
     done = False

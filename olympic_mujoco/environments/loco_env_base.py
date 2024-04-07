@@ -25,6 +25,7 @@ from olympic_mujoco.interfaces.mujoco_robot_interface import MujocoRobotInterfac
 from olympic_mujoco.enums.enums import AlgorithmType
 
 import mujoco_viewer
+import mujoco.viewer
 
 
 class LocoEnvBase(MultiMuJoCo):
@@ -150,6 +151,16 @@ class LocoEnvBase(MultiMuJoCo):
         #     self._domain_rand = None
         self._domain_rand = None
 
+        # TODO: 特别注意handles 和 handle 的区别
+        # xml_path="/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/environments/data/jvrc_step/jvrc1.xml"
+        # xml_handles = mjcf.from_path(xml_path)
+        # if type(xml_handles) != list:
+        #     xml_handles = [xml_handles]
+
+        # print("*****************************************************************")
+        # self.test_model_viewer(xml_handles)
+        # print("*****************************************************************")
+
         super().__init__(
             xml_handles,
             action_spec,
@@ -211,6 +222,45 @@ class LocoEnvBase(MultiMuJoCo):
         # print(self.mujoco_interface.get_motor_names())
         # print("--------------------------------------------")
         # print(self.mujoco_interface.test())
+    
+    def load_model(self,xml_file):
+        """
+            Takes an xml_file and compiles and loads the model.
+
+            Args:
+                xml_file (str/xml handle): A string with a path to the xml or an Mujoco xml handle.
+
+            Returns:
+                Mujoco model.
+
+        """
+        if type(xml_file) == mjcf.element.RootElement:
+            # load from xml handle
+            model = mujoco.MjModel.from_xml_string(xml=xml_file.to_xml_string(),
+                                                    assets=xml_file.get_assets())
+        elif type(xml_file) == str:
+            # load from path
+            model = mujoco.MjModel.from_xml_path(xml_file)
+        else:
+            raise ValueError(f"Unsupported type for xml_file {type(xml_file)}.")
+
+        return model
+
+    def test_model_viewer(self,xml_files):
+        print("这里执行test_model_viewer")
+        print("xml_file = ",xml_files)
+
+        _models = [self.load_model(f) for f in xml_files]
+
+        _current_model_idx = 0
+        _model = _models[_current_model_idx]
+
+        print("model id 0 = ",_model)
+
+        _data = mujoco.MjData(_model)
+
+        mujoco.viewer.launch(_model, _data)
+
 
     # ***********************************************************************************************************
 
@@ -227,9 +277,11 @@ class LocoEnvBase(MultiMuJoCo):
         ob = self.reset_model()
         return ob
     
-    # better render 这个实际上和原生的内嵌render基本上一模一样，但是多了一个self.viewer_setup()
-    def test_render(self):
+    # TODO:这里应该专门有一个模块
+
+    def render(self):
         if self.viewer is None:
+            # TODO:后续有时间这里应修改成自己的viewer库
             self.viewer = mujoco_viewer.MujocoViewer(self._model, self._data)
             self.viewer_setup()
         self.viewer.render()
@@ -358,7 +410,7 @@ class LocoEnvBase(MultiMuJoCo):
         # 如果需要渲染
         if render:
             # 渲染当前帧,如果记录则保存
-            frame = self.render(record)
+            frame = self.render()
         else:
             frame = None
 
@@ -463,7 +515,7 @@ class LocoEnvBase(MultiMuJoCo):
 
         if render:
             # 渲染当前帧,如果记录则保存
-            frame = self.render(record)
+            frame = self.render()
         else:
             frame = None
 
@@ -519,7 +571,7 @@ class LocoEnvBase(MultiMuJoCo):
 
                 if render:
                     # 渲染当前帧,如果记录则保存
-                    frame = self.render(record)
+                    frame = self.render()
                 else:
                     frame = None
 
