@@ -17,13 +17,13 @@ data = mujoco.MjData(model)
 viewer=mujoco_viewer.MujocoViewer(model, data)
 
 
-viewer.cam.trackbodyid = 1
-viewer.cam.distance = model.stat.extent * 1.5
-viewer.cam.lookat[2] = 1.5
-viewer.cam.lookat[0] = 2.0
-viewer.cam.elevation = -20
-viewer.vopt.geomgroup[0] = 1
-viewer._render_every_frame = True
+# viewer.cam.trackbodyid = 1
+# viewer.cam.distance = model.stat.extent * 1.5
+# viewer.cam.lookat[2] = 1.5
+# viewer.cam.lookat[0] = 2.0
+# viewer.cam.elevation = -20
+# viewer.vopt.geomgroup[0] = 1
+# viewer._render_every_frame = True
 
 while True:
     viewer.render()

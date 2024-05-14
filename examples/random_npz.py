@@ -31,6 +31,7 @@ joint_names = [
     'L_SHOULDER_P', 'L_SHOULDER_R', 'L_SHOULDER_Y', 'L_ELBOW_P', 'L_ELBOW_Y', 'L_WRIST_R', 'L_WRIST_Y', 'L_UTHUMB'
 ]
 
+# joint_names =  ['root', 'R_HIP_P', 'R_HIP_R', 'R_HIP_Y', 'R_KNEE', 'R_ANKLE_R', 'R_ANKLE_P', 'L_HIP_P', 'L_HIP_R', 'L_HIP_Y', 'L_KNEE', 'L_ANKLE_R', 'L_ANKLE_P', 'R_SHOULDER_P', 'R_SHOULDER_R', 'R_ELBOW_P', 'L_SHOULDER_P', 'L_SHOULDER_R', 'L_ELBOW_P']
 
 # 设置轨迹长度和时间步长
 traj_length = 1000
@@ -42,4 +43,4 @@ for joint in joint_names:
     traj_data[f'dq_{joint}'] = np.random.uniform(low=-1.0, high=1.0, size=(traj_length, 1))
 
 # 保存为npz文件
-np.savez('random_stick_jvrc.npz', **traj_data)
+np.savez('random_jvrc_3.npz', **traj_data)

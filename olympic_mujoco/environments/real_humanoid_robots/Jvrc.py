@@ -16,7 +16,7 @@ from olympic_mujoco.environments.loco_env_base import ValidTaskConf
 
 from olympic_mujoco.interfaces.mujoco_robot_interface import MujocoRobotInterface
 from olympic_mujoco.enums.enums import AlgorithmType
-from olympic_mujoco.tasks import stepping_task
+from olympic_mujoco.tasks import walking_task
 from olympic_mujoco.environments import robot
 
 """
@@ -85,25 +85,30 @@ class Jvrc(BaseHumanoidRobot):
         Constructor.
 
         """
-        print("Jvrc init")
+        # print("Jvrc init")
 
         #TODO：上面的是完整的jvrc机器人模型xml文件，需要配合_delete_from_xml_handle使用，但是可能是因为模型差异，不能进行良好的行走
         # 下面的是jvrc简易模型xml文件，不需要配合_delete_from_xml_handle使用，但是存在问题，不能正常显示皮肤且只显示机器人的下半身
-
-        # xml_path = (
-        #     Path(__file__).resolve().parent.parent
-        #     / "data"
-        #     / "jvrc_mj_description"
-        #     / "xml"
-        #     / "jvrc1.xml"
-        # ).as_posix()
-
-        xml_path = (
-            Path(__file__).resolve().parent.parent
-            / "data"
-            / "jvrc_step"
-            / "jvrc1.xml"
-        ).as_posix()
+        # 这里简单先加一个bool用于区分这两个模型
+        
+        train_about=True
+        # 为true表明是与强化学习训练相关的 ,对应的是不完整的模型,即jvrc_step中的
+        
+        if train_about:
+            xml_path = (
+                Path(__file__).resolve().parent.parent
+                / "data"
+                / "jvrc_step"
+                / "jvrc1.xml"
+            ).as_posix()
+        else:
+            xml_path = (
+                Path(__file__).resolve().parent.parent
+                / "data"
+                / "jvrc_mj_description"
+                / "xml"
+                / "jvrc1.xml"
+            ).as_posix()
 
 
         action_spec = self._get_action_specification()
@@ -124,10 +129,16 @@ class Jvrc(BaseHumanoidRobot):
 
         xml_handles = mjcf.from_path(xml_path)
 
-        # TODO:这里应该丰富逻辑，这里仅仅是测试使用
-        # joints_to_remove, motors_to_remove, equ_constr_to_remove = self._get_xml_modifications()
-        # xml_handles = self._delete_from_xml_handle(xml_handles, joints_to_remove,
-        #                                                   motors_to_remove, equ_constr_to_remove)
+        if not train_about:
+            # 禁用手臂的逻辑
+            # 分为两部分 1.使能手臂使得其不会触碰到机器人的其他身体部位
+            # if disable_arms:
+            #     xml_handle = self._reorient_arms(xml_handle) # reposition the arm
+
+            # 2.将手臂等无关机器人行走的joint,motor,equ从观测空间中移除
+            joints_to_remove, motors_to_remove, equ_constr_to_remove = self._get_xml_modifications()
+            xml_handles = self._delete_from_xml_handle(xml_handles, joints_to_remove,
+                                                            motors_to_remove, equ_constr_to_remove)
 
         super().__init__(
             xml_handles, action_spec, observation_spec, collision_groups, **kwargs
@@ -136,17 +147,22 @@ class Jvrc(BaseHumanoidRobot):
         # TODO:强化学习训练的代码
         self._initialize_observation_space()
 
+
+
+        # TODO:测试内容
+        # print("joints name = ",self.interface.get_joint_names())
+        
     #---------------------------------------------------------------------------------------------------------
-    #----------------------------------------- 观测空间的处理 ----------------------------------------------
+    #----------------------------------------- 观测空间的处理 --------------------------------------------------
     #---------------------------------------------------------------------------------------------------------
     # 用于根据算法和任务初始化观测空间
     # 分为两部分，一部分是设置观测空间的一系列参数，用于强化学习
     # 另一部分是用于设定观测空间都有哪些东西，即 _get_observation_specification
     # 但是考虑到模仿学习和强化学习的观测空间差别较大，所以这里在强化学习相关的操作中，先不使用 模仿学习的规范，这个存在一定的问题
     def _initialize_observation_space(self):
-        print("根据算法和任务初始化观测空间")
+        # print("根据算法和任务初始化观测空间")
         if self._algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
-            print("强化学习")
+            # print("强化学习")
             
             sim_dt = 0.0025  # 仿真步长设置为0.0025秒
             control_dt = 0.025  # 控制步长设置为0.025秒
@@ -186,12 +202,12 @@ class Jvrc(BaseHumanoidRobot):
             # set up interface
             self.interface = MujocoRobotInterface(self._model, self._data, 'R_ANKLE_P_S', 'L_ANKLE_P_S')
 
-            print("***********************************************************")
-            print("joint names = ",self.interface.get_joint_names())
-            print("***********************************************************")
+            # print("***********************************************************")
+            # print("joint names = ",self.interface.get_joint_names())
+            # print("***********************************************************")
 
             # set up task
-            self.task = stepping_task.SteppingTask(client=self.interface,
+            self.task = walking_task.WalkingTask(client=self.interface,
                                                 dt=control_dt,
                                                 neutral_foot_orient=np.array([1, 0, 0, 0]),
                                                 root_body='PELVIS_S',
@@ -233,67 +249,130 @@ class Jvrc(BaseHumanoidRobot):
         elif self._algorithm_type == AlgorithmType.IMITATION_LEARNING:
             print("模仿学习！")
 
-
+    # 这里同样要考虑两种观测空间，一种是模仿学习的观测空间，另一种是强化学习的
     def get_obs(self):
-        # external state
-        clock = [np.sin(2 * np.pi * self.task._phase / self.task._period),
-                 np.cos(2 * np.pi * self.task._phase / self.task._period)]
-        ext_state = np.concatenate((clock,
-                                    np.asarray(self.task._goal_steps_x).flatten(),
-                                    np.asarray(self.task._goal_steps_y).flatten(),
-                                    np.asarray(self.task._goal_steps_z).flatten(),
-                                    np.asarray(self.task._goal_steps_theta).flatten()))
+        if self._algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
+            # print("强化学习")
+            # external state
+            clock = [np.sin(2 * np.pi * self.task._phase / self.task._period),
+                    np.cos(2 * np.pi * self.task._phase / self.task._period)]
+            ext_state = np.concatenate((clock,
+                                        np.asarray(self.task._goal_steps_x).flatten(),
+                                        np.asarray(self.task._goal_steps_y).flatten(),
+                                        np.asarray(self.task._goal_steps_z).flatten(),
+                                        np.asarray(self.task._goal_steps_theta).flatten()))
+            
+            # internal state
+            qpos = np.copy(self.interface.get_qpos())
+            qvel = np.copy(self.interface.get_qvel())
 
-        # internal state
-        qpos = np.copy(self.interface.get_qpos())
-        qvel = np.copy(self.interface.get_qvel())
+            root_r, root_p = tf3.euler.quat2euler(qpos[3:7])[0:2]
+            root_orient = tf3.euler.euler2quat(root_r, root_p, 0)
+            root_ang_vel = qvel[3:6]
 
-        root_r, root_p = tf3.euler.quat2euler(qpos[3:7])[0:2]
-        root_orient = tf3.euler.euler2quat(root_r, root_p, 0)
-        root_ang_vel = qvel[3:6]
+            motor_pos = self.interface.get_act_joint_positions()
+            motor_vel = self.interface.get_act_joint_velocities()
+            motor_pos = [motor_pos[i] for i in self.actuators]
+            motor_vel = [motor_vel[i] for i in self.actuators]
 
-        motor_pos = self.interface.get_act_joint_positions()
-        motor_vel = self.interface.get_act_joint_velocities()
-        motor_pos = [motor_pos[i] for i in self.actuators]
-        motor_vel = [motor_vel[i] for i in self.actuators]
+            robot_state = np.concatenate([
+                root_orient,
+                root_ang_vel,
+                motor_pos,
+                motor_vel,
+            ])
 
-        robot_state = np.concatenate([
-            root_orient,
-            root_ang_vel,
-            motor_pos,
-            motor_vel,
-        ])
-        state = np.concatenate([robot_state, ext_state])
-        assert state.shape==(self.base_obs_len,)
-        return state.flatten()
+            state = np.concatenate([robot_state, ext_state])
+            assert state.shape==(self.base_obs_len,)
+            return state.flatten()
+        
+        elif self._algorithm_type == AlgorithmType.IMITATION_LEARNING:
+            print("模仿学习！")
     #---------------------------------------------------------------------------------------------------------
 
 
 
-    def _get_ground_forces(self):
-        """
-        Returns the ground forces (np.array). By default, 4 ground force sensors are used.
-        Environments that use more or less have to override this function.
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- step步进部分 ---------------------------------------------------
+    #---------------------------------------------------------------------------------------------------------
+    def step(self, a):
+        if self._algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
+            # print("强化学习")
+            applied_action = self.robot.step(a)
+            # compute reward
+            self.task.step()
+            rewards = self.task.calc_reward(self.robot.prev_torque, self.robot.prev_action, applied_action)
+            total_reward = sum([float(i) for i in rewards.values()])
 
-        """
+            # check if terminate
+            done = self.task.done()
 
-        grf = np.concatenate(
-            [
-                self._get_collision_force("floor", "foot_r")[:3],
-                self._get_collision_force("floor", "foot_l")[:3],
-            ]
+            obs = self.get_obs()
+            return obs, total_reward, done, rewards
+        elif self._algorithm_type == AlgorithmType.IMITATION_LEARNING:
+            print("模仿学习！")
+
+    # TODO：特别注意，这里的强化学习的reset和模仿学习的reset是有很大的区别的
+    def reset_model(self):
+        '''
+        # dynamics randomization
+        dofadr = [self.interface.get_jnt_qveladr_by_name(jn)
+                  for jn in self.interface.get_actuated_joint_names()]
+        for jnt in dofadr:
+            self.model.dof_frictionloss[jnt] = np.random.uniform(0,10)    # actuated joint frictionloss
+            self.model.dof_damping[jnt] = np.random.uniform(0.2,5)        # actuated joint damping
+            self.model.dof_armature[jnt] *= np.random.uniform(0.90, 1.10) # actuated joint armature
+        '''
+
+        c = 0.02
+        self.init_qpos = list(self.robot.init_qpos_)
+        self.init_qvel = list(self.robot.init_qvel_)
+        self.init_qpos = self.init_qpos + np.random.uniform(low=-c, high=c, size=self._model.nq)
+        self.init_qvel = self.init_qvel + np.random.uniform(low=-c, high=c, size=self._model.nv)
+
+        # modify init state acc to task
+        root_adr = self.interface.get_jnt_qposadr_by_name('root')[0]
+        self.init_qpos[root_adr+0] = np.random.uniform(-1, 1)
+        self.init_qpos[root_adr+1] = np.random.uniform(-1, 1)
+        self.init_qpos[root_adr+2] = 0.81 # 初始状态下机器人距离地面的高度 这里注意需要根据机器人模型进行修改
+        self.init_qpos[root_adr+3:root_adr+7] = tf3.euler.euler2quat(0, np.random.uniform(-5, 5)*np.pi/180, np.random.uniform(-np.pi, np.pi))
+        self.set_state(
+            self.init_qpos,
+            self.init_qvel
         )
+        self.task.reset(iter_count = self.robot.iteration_count)
+        obs = self.get_obs()
 
-        return grf
+        return obs
+    #---------------------------------------------------------------------------------------------------------
+            
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- xml操作(也相当于是对观测空间的操作) --------------------------------
+    #---------------------------------------------------------------------------------------------------------
 
-    @staticmethod
-    def _get_grf_size():
+    def _reorient_arms(xml_handle):
         """
-        Returns the size of the ground force vector.
+        Reorients the elbow to not collide with the hip.
+
+        Args:
+            xml_handle: Handle to Mujoco XML.
+
+        Returns:
+            Modified Mujoco XML handle.
 
         """
+        # TODO:这部分需要再考虑
+        # modify the arm orientation
+        # left_shoulder_pitch_link = xml_handle.find("body", "left_shoulder_pitch_link")
+        # left_shoulder_pitch_link.quat = [1.0, 0.25, 0.1, 0.0]
+        # right_elbow_link = xml_handle.find("body", "right_elbow_link")
+        # right_elbow_link.quat = [1.0, 0.0, 0.25, 0.0]
+        # right_shoulder_pitch_link = xml_handle.find("body", "right_shoulder_pitch_link")
+        # right_shoulder_pitch_link.quat = [1.0, -0.25, 0.1, 0.0]
+        # left_elbow_link = xml_handle.find("body", "left_elbow_link")
+        # left_elbow_link.quat = [1.0, 0.0, 0.25, 0.0]
 
-        return 6
+        return xml_handle
 
     # TODO:这里的删除是为了保证手臂等部位不会影响训练工作,也就是对观测空间obs的操作
     def _get_xml_modifications(self):
@@ -378,103 +457,7 @@ class Jvrc(BaseHumanoidRobot):
                 "L_WRIST_Y_motor",
                 "L_UTHUMB_motor",
             ]
-        if self._disable_back_joint:
-            # TODO:这里存在问题
-            print()
-            # joints_to_remove += ["back_bkz"]
-            # motors_to_remove += ["back_bkz_actuator"]
-
         return joints_to_remove, motors_to_remove, equ_constr_to_remove
-
-    def _has_fallen(self, obs, return_err_msg=False):
-        """
-        Checks if a model has fallen.
-
-        Args:
-            obs (np.array): Current observation.
-            return_err_msg (bool): If True, an error message with violations is returned.
-
-        Returns:
-            True, if the model has fallen for the current observation, False otherwise.
-            Optionally an error message is returned.
-
-        """
-        return False
-        # # Extracting information related to pelvic Euler angles from observational data
-        # pelvis_euler = self._get_from_obs(obs, ["q_pelvis_tilt", "q_pelvis_list", "q_pelvis_rotation"])
-        # # Determine whether the position of the pelvis along the y-axis meets specific conditions
-        # # 判断骨盆沿y轴的位置是否满足特定条件
-        # pelvis_y_condition = (obs[0] < -0.3) or (obs[0] > 0.1)
-        # pelvis_tilt_condition = (pelvis_euler[0] < (-np.pi / 4.5)) or (pelvis_euler[0] > (np.pi / 12))
-        # pelvis_list_condition = (pelvis_euler[1] < -np.pi / 12) or (pelvis_euler[1] > np.pi / 8)
-        # pelvis_rotation_condition = (pelvis_euler[2] < (-np.pi / 8)) or (pelvis_euler[2] > (np.pi / 8))
-
-        # # Based on the above conditions, determine whether the pelvis is in an unsafe state
-        # # If any condition is true, it is considered that the pelvic condition is not met
-        # pelvis_condition = (pelvis_y_condition or pelvis_tilt_condition or
-        #                     pelvis_list_condition or pelvis_rotation_condition)
-
-        # if return_err_msg:
-        #     error_msg = ""
-        #     if pelvis_y_condition:
-        #         error_msg += "pelvis_y_condition violated.\n"
-        #     elif pelvis_tilt_condition:
-        #         error_msg += "pelvis_tilt_condition violated.\n"
-        #     elif pelvis_list_condition:
-        #         error_msg += "pelvis_list_condition violated.\n"
-        #     elif pelvis_rotation_condition:
-        #         error_msg += "pelvis_rotation_condition violated.\n"
-
-        #     return pelvis_condition, error_msg
-        # else:
-
-        #     return pelvis_condition
-
-    @staticmethod
-    def generate(task="walk", dataset_type="real", **kwargs):
-        """
-        Returns an environment corresponding to the specified task.
-
-        Args:
-        task (str): Main task to solve. Either "walk", "run" or "carry". The latter is walking while carrying
-                an unknown weight, which makes the task partially observable.
-        dataset_type (str): "real" or "perfect". "real" uses real motion capture data as the
-                reference trajectory. This data does not perfectly match the kinematics
-                and dynamics of this environment, hence it is more challenging. "perfect" uses
-                a perfect dataset.
-
-        """
-        check_validity_task_mode_dataset(
-            Jvrc.__name__, task, None, dataset_type, *Jvrc.valid_task_confs.get_all()
-        )
-        if dataset_type == "real":
-            if task == "run":
-                path = "datasets/humanoids/real/random_stick_jvrc.npz"
-            else:
-                path = "datasets/humanoids/real/random_stick_jvrc.npz"
-        elif dataset_type == "perfect":
-            if "use_foot_forces" in kwargs.keys():
-                assert kwargs["use_foot_forces"] is False
-            if "disable_arms" in kwargs.keys():
-                assert kwargs["disable_arms"] is True
-            if "disable_back_joint" in kwargs.keys():
-                assert kwargs["disable_back_joint"] is False
-            if "hold_weight" in kwargs.keys():
-                assert kwargs["hold_weight"] is False
-
-            if task == "run":
-                path = "datasets/humanoids/perfect/unitreeh1_run/perfect_expert_dataset_det.npz"
-            else:
-                path = "datasets/humanoids/perfect/unitreeh1_walk/perfect_expert_dataset_det.npz"
-
-        return BaseHumanoidRobot.generate(
-            Jvrc,
-            path,
-            task,
-            dataset_type,
-            clip_trajectory_to_joint_ranges=True,
-            **kwargs
-        )
 
     @staticmethod
     def _get_observation_specification():
@@ -588,50 +571,121 @@ class Jvrc(BaseHumanoidRobot):
         ]
 
         return action_spec
+    #---------------------------------------------------------------------------------------------------------
 
-    # 强化学习相关的代码 
+    def _has_fallen(self, obs, return_err_msg=False):
+        """
+        Checks if a model has fallen.
 
-    def step(self, a):
-        applied_action = self.robot.step(a)
+        Args:
+            obs (np.array): Current observation.
+            return_err_msg (bool): If True, an error message with violations is returned.
 
-        # compute reward
-        self.task.step()
-        rewards = self.task.calc_reward(self.robot.prev_torque, self.robot.prev_action, applied_action)
-        total_reward = sum([float(i) for i in rewards.values()])
+        Returns:
+            True, if the model has fallen for the current observation, False otherwise.
+            Optionally an error message is returned.
 
-        # check if terminate
-        done = self.task.done()
+        """
+        return False
+        # # Extracting information related to pelvic Euler angles from observational data
+        # pelvis_euler = self._get_from_obs(obs, ["q_pelvis_tilt", "q_pelvis_list", "q_pelvis_rotation"])
+        # # Determine whether the position of the pelvis along the y-axis meets specific conditions
+        # # 判断骨盆沿y轴的位置是否满足特定条件
+        # pelvis_y_condition = (obs[0] < -0.3) or (obs[0] > 0.1)
+        # pelvis_tilt_condition = (pelvis_euler[0] < (-np.pi / 4.5)) or (pelvis_euler[0] > (np.pi / 12))
+        # pelvis_list_condition = (pelvis_euler[1] < -np.pi / 12) or (pelvis_euler[1] > np.pi / 8)
+        # pelvis_rotation_condition = (pelvis_euler[2] < (-np.pi / 8)) or (pelvis_euler[2] > (np.pi / 8))
 
-        obs = self.get_obs()
-        return obs, total_reward, done, rewards
+        # # Based on the above conditions, determine whether the pelvis is in an unsafe state
+        # # If any condition is true, it is considered that the pelvic condition is not met
+        # pelvis_condition = (pelvis_y_condition or pelvis_tilt_condition or
+        #                     pelvis_list_condition or pelvis_rotation_condition)
 
-    def reset_model(self):
-        '''
-        # dynamics randomization
-        dofadr = [self.interface.get_jnt_qveladr_by_name(jn)
-                  for jn in self.interface.get_actuated_joint_names()]
-        for jnt in dofadr:
-            self.model.dof_frictionloss[jnt] = np.random.uniform(0,10)    # actuated joint frictionloss
-            self.model.dof_damping[jnt] = np.random.uniform(0.2,5)        # actuated joint damping
-            self.model.dof_armature[jnt] *= np.random.uniform(0.90, 1.10) # actuated joint armature
-        '''
+        # if return_err_msg:
+        #     error_msg = ""
+        #     if pelvis_y_condition:
+        #         error_msg += "pelvis_y_condition violated.\n"
+        #     elif pelvis_tilt_condition:
+        #         error_msg += "pelvis_tilt_condition violated.\n"
+        #     elif pelvis_list_condition:
+        #         error_msg += "pelvis_list_condition violated.\n"
+        #     elif pelvis_rotation_condition:
+        #         error_msg += "pelvis_rotation_condition violated.\n"
 
-        c = 0.02
-        self.init_qpos = list(self.robot.init_qpos_)
-        self.init_qvel = list(self.robot.init_qvel_)
-        self.init_qpos = self.init_qpos + np.random.uniform(low=-c, high=c, size=self._model.nq)
-        self.init_qvel = self.init_qvel + np.random.uniform(low=-c, high=c, size=self._model.nv)
+        #     return pelvis_condition, error_msg
+        # else:
 
-        # modify init state acc to task
-        root_adr = self.interface.get_jnt_qposadr_by_name('root')[0]
-        self.init_qpos[root_adr+0] = np.random.uniform(-1, 1)
-        self.init_qpos[root_adr+1] = np.random.uniform(-1, 1)
-        self.init_qpos[root_adr+2] = 0.81
-        self.init_qpos[root_adr+3:root_adr+7] = tf3.euler.euler2quat(0, np.random.uniform(-5, 5)*np.pi/180, np.random.uniform(-np.pi, np.pi))
-        self.set_state(
-            self.init_qpos,
-            self.init_qvel
+        #     return pelvis_condition
+
+
+    def _get_ground_forces(self):
+        """
+        Returns the ground forces (np.array). By default, 4 ground force sensors are used.
+        Environments that use more or less have to override this function.
+
+        """
+
+        grf = np.concatenate(
+            [
+                self._get_collision_force("floor", "foot_r")[:3],
+                self._get_collision_force("floor", "foot_l")[:3],
+            ]
         )
-        self.task.reset(iter_count = self.robot.iteration_count)
-        obs = self.get_obs()
-        return obs
+
+        return grf
+
+    @staticmethod
+    def _get_grf_size():
+        """
+        Returns the size of the ground force vector.
+
+        """
+
+        return 6
+
+
+    @staticmethod
+    def generate(task="walk", dataset_type="real", **kwargs):
+        """
+        Returns an environment corresponding to the specified task.
+
+        Args:
+        task (str): Main task to solve. Either "walk", "run" or "carry". The latter is walking while carrying
+                an unknown weight, which makes the task partially observable.
+        dataset_type (str): "real" or "perfect". "real" uses real motion capture data as the
+                reference trajectory. This data does not perfectly match the kinematics
+                and dynamics of this environment, hence it is more challenging. "perfect" uses
+                a perfect dataset.
+
+        """
+        check_validity_task_mode_dataset(
+            Jvrc.__name__, task, None, dataset_type, *Jvrc.valid_task_confs.get_all()
+        )
+        if dataset_type == "real":
+            if task == "run":
+                path = "/home/wzx/new-Github-Workspaces/olympics-mujoco/random_jvrc_3.npz"
+            else:
+                path = "/home/wzx/new-Github-Workspaces/olympics-mujoco/random_jvrc_3.npz"
+        elif dataset_type == "perfect":
+            if "use_foot_forces" in kwargs.keys():
+                assert kwargs["use_foot_forces"] is False
+            if "disable_arms" in kwargs.keys():
+                assert kwargs["disable_arms"] is True
+            if "disable_back_joint" in kwargs.keys():
+                assert kwargs["disable_back_joint"] is False
+            if "hold_weight" in kwargs.keys():
+                assert kwargs["hold_weight"] is False
+
+            if task == "run":
+                path = "datasets/humanoids/perfect/unitreeh1_run/perfect_expert_dataset_det.npz"
+            else:
+                path = "datasets/humanoids/perfect/unitreeh1_walk/perfect_expert_dataset_det.npz"
+
+        return BaseHumanoidRobot.generate(
+            Jvrc,
+            path,
+            task,
+            dataset_type,
+            clip_trajectory_to_joint_ranges=True,
+            **kwargs
+        )

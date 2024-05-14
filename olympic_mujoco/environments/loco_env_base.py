@@ -103,25 +103,15 @@ class LocoEnvBase(MultiMuJoCo):
                                         如果并行设置为 True,则此数字必须大于 1。
         viewer_params: 其他视图参数。
         """
-        #print("locoEnv")
-        
-        # TODO:这里可能还需调整
-        self._frame_skip = (control_dt/sim_dt)
-        self._sim_dt=sim_dt
-        self._train_start=train_start
-
-
-        # TODO: viewer相关代码 有待修改
-        self.viewer = None
 
         # TODO：区分算法的类型
         # TODO：这里传递参数的方式存在问题，make()中应该想办法包含这个类型
         self._algorithm_type=algorithm_type
+        # self._algorithm_type=AlgorithmType.IMITATION_LEARNING
 
-        print("***************************")
-        print("self._algorithm_type = ",self._algorithm_type)
-        print("***************************")
+        self.viewer=None
 
+        # TODO: 特别注意handles 和 handle 的区别
         if type(xml_handles) != list:
             xml_handles = [xml_handles]
 
@@ -151,16 +141,6 @@ class LocoEnvBase(MultiMuJoCo):
         #     self._domain_rand = None
         self._domain_rand = None
 
-        # TODO: 特别注意handles 和 handle 的区别
-        # xml_path="/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/environments/data/jvrc_step/jvrc1.xml"
-        # xml_handles = mjcf.from_path(xml_path)
-        # if type(xml_handles) != list:
-        #     xml_handles = [xml_handles]
-
-        # print("*****************************************************************")
-        # self.test_model_viewer(xml_handles)
-        # print("*****************************************************************")
-
         super().__init__(
             xml_handles,
             action_spec,
@@ -188,8 +168,8 @@ class LocoEnvBase(MultiMuJoCo):
             self.info.action_space.high.copy(),
         )
         # 计算归一化动作的平均值和差值
-        self.norm_act_mean = (high + low) / 2.0  # 动作的平均值
-        self.norm_act_delta = (high - low) / 2.0  # 动作的差值
+        # self.norm_act_mean = (high + low) / 2.0  # 动作的平均值
+        # self.norm_act_delta = (high - low) / 2.0  # 动作的差值
         # 重新设置动作空间的最小值和最大值为-1和1
         self.info.action_space.low[:] = -1.0
         self.info.action_space.high[:] = 1.0
@@ -211,58 +191,20 @@ class LocoEnvBase(MultiMuJoCo):
             # 设置是否使用吸收状态（在某些强化学习任务中,用于指示一个episode的结束）
             self._use_absorbing_states = use_absorbing_states
 
+        # TODO:强化学习相关
+        self.frame_skip = (control_dt/sim_dt)
+        self._model.opt.timestep = sim_dt
 
-    def test(self):
-        # actuator_names = [
-        #     mujoco.mj_id2name(self._model, mujoco.mjtObj.mjOBJ_ACTUATOR, i)
-        #     for i in range(self._model.nu)
-        # ]
-        # print("actuator_names = ",actuator_names)
-        self.mujoco_interface = MujocoRobotInterface(self._model, self._data, 'right_foot', 'left_foot')
-        # print(self.mujoco_interface.get_motor_names())
-        # print("--------------------------------------------")
-        # print(self.mujoco_interface.test())
-    
-    def load_model(self,xml_file):
-        """
-            Takes an xml_file and compiles and loads the model.
+        self.init_qpos = self._data.qpos.ravel().copy()
+        self.init_qvel = self._data.qvel.ravel().copy()
 
-            Args:
-                xml_file (str/xml handle): A string with a path to the xml or an Mujoco xml handle.
-
-            Returns:
-                Mujoco model.
-
-        """
-        if type(xml_file) == mjcf.element.RootElement:
-            # load from xml handle
-            model = mujoco.MjModel.from_xml_string(xml=xml_file.to_xml_string(),
-                                                    assets=xml_file.get_assets())
-        elif type(xml_file) == str:
-            # load from path
-            model = mujoco.MjModel.from_xml_path(xml_file)
-        else:
-            raise ValueError(f"Unsupported type for xml_file {type(xml_file)}.")
-
-        return model
-
-    def test_model_viewer(self,xml_files):
-        print("这里执行test_model_viewer")
-        print("xml_file = ",xml_files)
-
-        _models = [self.load_model(f) for f in xml_files]
-
-        _current_model_idx = 0
-        _model = _models[_current_model_idx]
-
-        print("model id 0 = ",_model)
-
-        _data = mujoco.MjData(_model)
-
-        mujoco.viewer.launch(_model, _data)
-
-
+    # TODO:这部分是强化学习训练相关的代码
     # ***********************************************************************************************************
+    def test(self):
+        self.obs_helper.get_joint_pos_from_obs(
+            self.obs_helper._build_obs(self._data)
+        )
+
 
     def reset_model(self):
         """
@@ -272,7 +214,7 @@ class LocoEnvBase(MultiMuJoCo):
         raise NotImplementedError
     
     def test_reset(self):
-        print("这里调用的是test_reset")
+        # print("这里调用的是test_reset")
         mujoco.mj_resetData(self._model, self._data)
         ob = self.reset_model()
         return ob
@@ -338,7 +280,6 @@ class LocoEnvBase(MultiMuJoCo):
         """
         # 检查是否已经有轨迹被加载
         if self.trajectories is not None:
-            # 如果有,发出警告,提示旧的轨迹将被新的轨迹覆盖
             warnings.warn("新轨迹已加载,将覆盖旧轨迹。", RuntimeWarning)
 
         # 创建新的Trajectory对象,使用以下参数进行初始化：
@@ -556,6 +497,12 @@ class LocoEnvBase(MultiMuJoCo):
                 self._simulation_post_step()
                 # 获取当前的关节位置
                 curr_qpos = self._get_joint_pos()
+
+
+                # print("///////////////////////////////////////////////////////////////////")
+                # print("self._get_joint_pos() = ",self._get_joint_pos())
+                # print("///////////////////////////////////////////////////////////////////")
+
                 # 获取下一个样本
                 sample = self.trajectories.get_next_sample()
                 # 如果样本为None,表示到达轨迹末尾,重置环境
@@ -583,6 +530,7 @@ class LocoEnvBase(MultiMuJoCo):
         self.reset()
         # 获取当前的关节位置
         curr_qpos = self._get_joint_pos()
+
         # 停止模拟
         self.stop()
         # 如果需要记录
@@ -602,60 +550,26 @@ class LocoEnvBase(MultiMuJoCo):
             obs (可选[np.array]): 用于重置环境的观测值。
 
         """
-        # 使用MuJoCo库函数重置模型数据和数据结构
-        mujoco.mj_resetData(self._model, self._data)
-        self.mean_grf.reset()
 
-        # 如果设置了域随机化（domain randomization）
-        if self._domain_rand is not None:
-            self._models[self._current_model_idx] = (
-                self._domain_rand.get_randomized_model(self._current_model_idx)
-            )
-            self._datas[self._current_model_idx] = mujoco.MjData(
-                self._models[self._current_model_idx]
-            )
+        if self._algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
+            obs = self.test_reset()
+            return obs
+        elif self._algorithm_type == AlgorithmType.IMITATION_LEARNING:
 
-        # 如果开启了随机环境重置
-        if self._random_env_reset:
-            # 随机选择一个模型索引
-            self._current_model_idx = np.random.randint(0, len(self._models))
-        else:
-            # 顺序选择下一个模型索引（如果到达末尾，则回到第一个）
-            self._current_model_idx = (
-                self._current_model_idx + 1
-                if self._current_model_idx < len(self._models) - 1
-                else 0
-            )
-        # 更新当前模型和数据结构
-        self._model = self._models[self._current_model_idx]
-        self._data = self._datas[self._current_model_idx]
-        # 更新观测值助手（用于构建观测值）
-        self.obs_helper = self.obs_helpers[self._current_model_idx]
+            # 使用MuJoCo库函数重置模型数据和数据结构
+            mujoco.mj_resetData(self._model, self._data)
+            self.mean_grf.reset()
 
-        # print("self._current_model_idx = ",self._current_model_idx)
-        # print("self.obs_helpers = ",self.obs_helpers)
+            # 更新当前模型和数据结构
+            self._model = self._models[self._current_model_idx]
+            self._data = self._datas[self._current_model_idx]
+            # 更新观测值助手（用于构建观测值）
+            self.obs_helper = self.obs_helpers[self._current_model_idx]
 
-        # TODO:为了对接LearningHumanoidWalk函数进行机器人行走训练，下面作为测试参数存在
-        if self._train_start is True:
-            # 设置帧跳过数量和仿真时间步长
-            self._model.opt.timestep = self._sim_dt
-            # 初始化模型的位置和速度
-            self.init_qpos = self._data.qpos.ravel().copy()
-            self.init_qvel = self._data.qvel.ravel().copy()
-
-        self.setup(obs)
-
-        if self._viewer is not None and self.more_than_one_env:
-            self._viewer.load_new_model(self._model)
-
-        self._obs = self._create_observation(self.obs_helper._build_obs(self._data))
-
-        print("**********************************")
-        print("len(self._obs) = ",len(self._obs))
-        print("**********************************")
-
-
-        return self._modify_observation(self._obs)
+            self.setup(obs)
+            
+            self._obs = self._create_observation(self.obs_helper._build_obs(self._data))
+            return self._modify_observation(self._obs)
 
     def setup(self, obs):
         """
@@ -719,6 +633,12 @@ class LocoEnvBase(MultiMuJoCo):
         """
         # 获取观察值的规范
         obs_spec = self.obs_helper.observation_spec
+
+        # print("***********************************************************************************")
+        # print("obs_spec = ",obs_spec)
+        # print("***********************************************************************************")
+
+
         # 确保样本的长度与观察规范长度相同
         assert len(sample) == len(obs_spec)
 
@@ -892,7 +812,7 @@ class LocoEnvBase(MultiMuJoCo):
 
 
     #---------------------------------------------------------------------------------------------------------
-    #----------------------------------------- xml操作(也相当于是对观测空间的操作) ----------------------------------------------
+    #----------------------------------------- xml操作(也相当于是对观测空间的操作) --------------------------------
     #---------------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -921,11 +841,11 @@ class LocoEnvBase(MultiMuJoCo):
             e_handle = xml_handle.find("equality", e)
             e_handle.remove()
 
-        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        for joint in xml_handle.find_all('joint'):
-            # 打印每个关节的名称
-            print(joint.name)
-        print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        # for joint in xml_handle.find_all('joint'):
+        #     # 打印每个关节的名称
+        #     print(joint.name)
+        # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         
         return xml_handle
     #---------------------------------------------------------------------------------------------------------

@@ -7,8 +7,10 @@ import gymnasium as gym
 
 
 # env = gym.make("OlympicMujoco", env_name="StickFigureA1.run")
+env = gym.make("OlympicMujoco", env_name="StickFigureA3.run")
+
 # env = gym.make("OlympicMujoco", env_name="UnitreeH1.run")
-env = gym.make("OlympicMujoco", env_name="Jvrc.run")
+# env = gym.make("OlympicMujoco", env_name="Jvrc.run")
 
 
 # print(type(env))

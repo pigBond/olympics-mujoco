@@ -13,12 +13,13 @@ class JVRC:
         self.kp = pdgains[0]
         self.kd = pdgains[1]
 
+        # print("***********************************************")
         # print("self.kp = ",self.kp)
         # print("self.kd = ",self.kd)
-        print("self.kp.shape = ",self.kp.shape)
-        print("self.kd.shape = ",self.kd.shape)
-        print("self.client.nu() = ",self.client.nu())
-
+        # print("self.kp.shape = ",self.kp.shape)
+        # print("self.kd.shape = ",self.kd.shape)
+        # print("self.client.nu() = ",self.client.nu())
+        # print("***********************************************")
 
         """
         <actuator>
@@ -72,10 +73,10 @@ class JVRC:
         nominal_pose = [q*np.pi/180.0 for q in half_sitting_pose]
         robot_pose = base_position + base_orientation + nominal_pose
 
-        print("len(half_sitting_pose) = ",len(half_sitting_pose))
-        print("robot_pose = ",robot_pose)
-        print("len(robot_pose) = ",len(robot_pose))
-        print("self.client.nq() = ",self.client.nq())
+        # print("len(half_sitting_pose) = ",len(half_sitting_pose))
+        # print("robot_pose = ",robot_pose)
+        # print("len(robot_pose) = ",len(robot_pose))
+        # print("self.client.nq() = ",self.client.nq())
 
         assert len(robot_pose)==self.client.nq()
         self.init_qpos_[-len(robot_pose):] = base_position + base_orientation + nominal_pose
@@ -106,7 +107,7 @@ class JVRC:
         return filtered_action
 
     def do_simulation(self, target, n_frames):
-        ratio = self.client.get_gear_ratios()
+        ratio = self.client.get_gear_ratios() 
         for _ in range(n_frames):
             tau = self.client.step_pd(target, np.zeros(self.client.nu()))
             tau = [(i/j) for i,j in zip(tau, ratio)]

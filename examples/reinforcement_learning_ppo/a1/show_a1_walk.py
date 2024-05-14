@@ -24,12 +24,6 @@ def print_reward(ep_rewards):
 
 def run(env, policy):
     observation = env.test_reset()
-    print("********************")
-    print("size = ",len(observation))
-    print("observation =",observation)
-    print("********************")
-
-
     env.render()
     viewer = env.viewer
     viewer._paused = False
@@ -47,14 +41,7 @@ def run(env, policy):
         observation, _, done, info = env.step(action.copy())
         ep_rewards.append(info)
 
-
-        # print("///////////////////////////////////////////////////////////////////")
-        # print("self._get_joint_pos() = ",env._get_joint_pos())
-        # print("///////////////////////////////////////////////////////////////////")
-
         env.render()
-
-
 
         if hasattr(env, 'frame_skip'):
             end = time.time()
@@ -68,9 +55,7 @@ def run(env, policy):
     env.close()
 
 def main():
-    # _path="/home/wzx/test-workspace/LearningHumanoidWalking/trained/jvrc_stepper/actor.pt"
-    _path="/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/trained/test_test/actor.pt"
-    #_path="/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/trained/test_jvrc_step/actor.pt"
+    _path="/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/trained/a3_walk/actor.pt"
 
     path_to_actor = ""
     path_to_pkl = ""
@@ -86,26 +71,8 @@ def main():
     # load trained policy
     policy = torch.load(path_to_actor)
     policy.eval()
-    # import the correct environment
-    # mdp = LocoEnvBase.make("Jvrc.run.real")
-    # env = import_env(run_args.env)()
-    env = LocoEnvBase.make("Jvrc.run.real")
 
-    print("path_to_actor = ",path_to_actor)
-    print("run_args = ",run_args)
-    print("policy = ",policy)
-
-
-    # path_to_actor =  /home/wzx/test-workspace/LearningHumanoidWalking/trained/jvrc_stepper/actor.pt
-    # run_args =  Namespace(anneal=1.0, clip=0.2, continued=None, entropy_coeff=0.0, env='jvrc_step', epochs=3, eps=1e-05, eval_freq=100, gamma=0.99, input_norm_steps=100000, lam=0.95, logdir='stepper_logs/log_jvrc_full', lr=0.0001, max_grad_norm=0.05, max_traj_len=400, minibatch_size=64, mirror_coeff=0.4, n_itr=20000, no_mirror=False, num_procs=24, num_steps=5096, seed=0, std_dev=-1.5, use_gae=True)
-    # policy =  Gaussian_FF_Actor(
-    #     (actor_layers): ModuleList(
-    #         (0): Linear(in_features=41, out_features=256, bias=True)
-    #         (1): Linear(in_features=256, out_features=256, bias=True)
-    #     )
-    #     (means): Linear(in_features=256, out_features=12, bias=True)
-    #     )
-
+    env = LocoEnvBase.make("StickFigureA1.run.real")
 
     run(env, policy)
     print("-----------------------------------------")

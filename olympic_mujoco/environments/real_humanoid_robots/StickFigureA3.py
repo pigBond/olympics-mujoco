@@ -18,7 +18,7 @@ from olympic_mujoco.enums.enums import AlgorithmType
 from olympic_mujoco.tasks import walking_task
 from olympic_mujoco.environments import robot
 
-class StickFigureA1(BaseHumanoidRobot):
+class StickFigureA3(BaseHumanoidRobot):
 
     valid_task_confs = ValidTaskConf(tasks=["walk", "run","test"],
                                      data_types=["real", "perfect"]
@@ -29,9 +29,9 @@ class StickFigureA1(BaseHumanoidRobot):
         Constructor.
 
         """
-        print("StickFigureA1")
+        # print("StickFigureA3")
 
-        xml_path = (Path(__file__).resolve().parent.parent / "data" / "stickFigure_A1" / "a1.xml").as_posix()
+        xml_path = (Path(__file__).resolve().parent.parent / "data" / "stickFigure_A3" / "a3.xml").as_posix()
 
         action_spec = self._get_action_specification()
 
@@ -402,8 +402,8 @@ class StickFigureA1(BaseHumanoidRobot):
                 a perfect dataset.
 
         """
-        check_validity_task_mode_dataset(StickFigureA1.__name__, task, None, dataset_type,
-                                         *StickFigureA1.valid_task_confs.get_all())
+        check_validity_task_mode_dataset(StickFigureA3.__name__, task, None, dataset_type,
+                                         *StickFigureA3.valid_task_confs.get_all())
         if dataset_type == "real":
             if task == "run":
                 path = "datasets/humanoids/real/random_stick.npz"
@@ -424,5 +424,5 @@ class StickFigureA1(BaseHumanoidRobot):
             else:
                 path = "datasets/humanoids/perfect/unitreeh1_walk/perfect_expert_dataset_det.npz"
 
-        return BaseHumanoidRobot.generate(StickFigureA1, path, task, dataset_type,
+        return BaseHumanoidRobot.generate(StickFigureA3, path, task, dataset_type,
                                           clip_trajectory_to_joint_ranges=True, **kwargs)

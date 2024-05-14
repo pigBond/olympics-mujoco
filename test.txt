@@ -5,3 +5,8 @@
 
 #---------------------------------------------------------------------------------------------------------
 
+
+        if self._algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
+            print("强化学习")
+        elif self._algorithm_type == AlgorithmType.IMITATION_LEARNING:
+            print("模仿学习！")
