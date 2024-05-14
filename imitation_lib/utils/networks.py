@@ -59,10 +59,18 @@ class Standardizer(nn.Module):
         self.mean = 0.0
         self.std = 1.0
 
+    # def forward(self, inputs):
+    #     self.update_mean_std(inputs.detach().cpu().numpy())
+    #     mean = torch.tensor(self.mean).cuda() if self._use_cuda else torch.tensor(self.mean)
+    #     std = torch.tensor(self.std).cuda() if self._use_cuda else torch.tensor(self.std)
+    #     return (inputs - mean) / std
+        
     def forward(self, inputs):
+        # 更新mean和std，先将inputs移动到CPU
         self.update_mean_std(inputs.detach().cpu().numpy())
-        mean = torch.tensor(self.mean).cuda() if self._use_cuda else torch.tensor(self.mean)
-        std = torch.tensor(self.std).cuda() if self._use_cuda else torch.tensor(self.std)
+        # 确保mean和std在正确的设备上
+        mean = torch.tensor(self.mean).to(inputs.device)
+        std = torch.tensor(self.std).to(inputs.device)
         return (inputs - mean) / std
     
     def update_mean_std(self, x):
