@@ -106,8 +106,8 @@ class LocoEnvBase(MultiMuJoCo):
 
         # TODO：区分算法的类型
         # TODO：这里传递参数的方式存在问题，make()中应该想办法包含这个类型
-        self._algorithm_type=algorithm_type
-        # self._algorithm_type=AlgorithmType.IMITATION_LEARNING
+        # self._algorithm_type=algorithm_type
+        self._algorithm_type=AlgorithmType.IMITATION_LEARNING
 
         self.viewer=None
 
@@ -1037,8 +1037,52 @@ class LocoEnvBase(MultiMuJoCo):
                 task_names.append(task_name)
 
         return task_names
+    
+
+
+    def _get_from_obs(self, obs, keys):
+        """
+        Returns a part of the observation based on the specified keys.
+
+        Args:
+            obs (np.array): Observation array.
+            keys (list or str): List of keys or just one key which are
+                used to extract entries from the observation.
+
+        Returns:
+            np.array including the parts of the original observation whose
+            keys were specified.
+
+        """
+        if self._algorithm_type == AlgorithmType.IMITATION_LEARNING:
+            # obs has removed x and y positions, add dummy entries
+            obs = np.concatenate([[0.0, 0.0], obs])
+            if type(keys) != list:
+                assert type(keys) == str
+                keys = list(keys)
+
+            entries = []
+            for key in keys:
+                entries.append(self.obs_helper.get_from_obs(obs, key))
+
+            return np.concatenate(entries)
+
 
     _registered_envs = dict()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class ValidTaskConf:
