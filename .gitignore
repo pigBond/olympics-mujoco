@@ -1,6 +1,6 @@
 venv
 __pycache__/
 olympic_mujoco/datasets/
-olympic_mujoco/trained
-logs
-logs_dir
+olympic_mujoco/trained/
+logs/
+logs_dir/

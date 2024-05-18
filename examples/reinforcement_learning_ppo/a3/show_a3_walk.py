@@ -10,6 +10,8 @@ import sys
 sys.path.append(os.getcwd())
 
 from olympic_mujoco.environments.loco_env_base import LocoEnvBase
+from olympic_mujoco.enums.enums import AlgorithmType
+
 
 def print_reward(ep_rewards):
     mean_rewards = {k:[] for k in ep_rewards[-1].keys()}
@@ -72,7 +74,7 @@ def main():
     policy = torch.load(path_to_actor)
     policy.eval()
 
-    env = LocoEnvBase.make("StickFigureA3.run.real")
+    env = LocoEnvBase.make("StickFigureA3.run.real",algorithm_type=AlgorithmType.REINFORCEMENT_LEARNING)
 
     run(env, policy)
     print("-----------------------------------------")

@@ -367,7 +367,7 @@ class WalkingTask(object):
         # 初始化参数字典，用于生成步态序列
         d = {'step_size':0.3, 'step_gap':0.15, 'step_height':0, 'num_steps':20, 'curved':False, 'lateral':False}
         
-        print("mode = ",self.mode)
+        # print("mode = ",self.mode)
 
         # 根据模式生成步态序列
         if self.mode == WalkModes.STANDING:

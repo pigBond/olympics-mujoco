@@ -28,9 +28,10 @@ if __name__ == '__main__':
                           n_steps_per_fit=1000,
                           use_cuda=USE_CUDA)
 
-    env_ids = ["Atlas.walk", 
-               "Talos.walk", 
-               "UnitreeH1.walk", "UnitreeH1.run"]
+    # env_ids = ["Atlas.walk", 
+    #            "Talos.walk", 
+    #            "UnitreeH1.walk", "UnitreeH1.run"]
+    env_ids = ["Atlas.walk"]
 
     for env_id in env_ids:
         launcher.add_experiment(env_id__=env_id, **default_params)

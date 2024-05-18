@@ -2,7 +2,6 @@ import os
 import sys
 import argparse
 import ray
-import yaml
 from functools import partial
 import numpy as np
 import torch
@@ -12,6 +11,7 @@ import sys
 sys.path.append(os.getcwd())
 
 from olympic_mujoco.environments.loco_env_base import LocoEnvBase
+from olympic_mujoco.enums.enums import AlgorithmType
 
 from rl.algos.ppo import PPO
 from rl.policies.actor import Gaussian_FF_Actor
@@ -28,7 +28,7 @@ def run_experiment(args):
     Env = import_env()
 
     # wrapper function for creating parallelized envs
-    env_fn = partial(Env)
+    env_fn = partial(Env,algorithm_type=AlgorithmType.REINFORCEMENT_LEARNING)
 
     if not args.no_mirror:
         try:
@@ -114,31 +114,34 @@ if __name__ == "__main__":
     # --eval_freq: 评估频率，可选参数，默认100，类型整数（int）
     # --continued: 预训练权重路径，可选参数，默认None，类型字符串（str）
 
-    # 读取YAML文件
-    with open('examples/reinforcement_learning_ppo/a3/config.yaml', 'r') as stream:
-        config = yaml.safe_load(stream)
-
-    # 设置命令行参数
     parser = argparse.ArgumentParser()
-    for key, value in config.items():
-        # 对于布尔值，需要特殊处理
-        if isinstance(value, bool):
-            # 如果配置文件中的默认值是True，则使用store_false
-            if value:
-                parser.add_argument(f"--{key}", action='store_false', default=value)
-            else:
-                parser.add_argument(f"--{key}", action='store_true', default=value)
-        else:
-            parser.add_argument(f"--{key}", type=type(value), default=value)
 
-    # 检查第一个参数是否为 'train'
     if sys.argv[1] != 'train':
         raise Exception("Invalid usage.")
+
     sys.argv.remove(sys.argv[1])
-
-    # 解析参数
+    parser.add_argument("--seed", default=0, type=int)                        # Sets Gym, PyTorch and Numpy seeds
+    parser.add_argument("--logdir", type=str, default="./logs_dir/")          # Where to log diagnostics to
+    parser.add_argument("--input_norm_steps", type=int, default=100000)
+    parser.add_argument("--n_itr", type=int, default=20000, help="Number of iterations of the learning algorithm")
+    parser.add_argument("--lr", type=float, default=1e-4, help="Adam learning rate") # Xie
+    parser.add_argument("--eps", type=float, default=1e-5, help="Adam epsilon (for numerical stability)")
+    parser.add_argument("--lam", type=float, default=0.95, help="Generalized advantage estimate discount")
+    parser.add_argument("--gamma", type=float, default=0.99, help="MDP discount")
+    parser.add_argument("--anneal", default=1.0, action='store_true', help="anneal rate for stddev")
+    parser.add_argument("--std_dev", type=int, default=-1.5, help="exponent of exploration std_dev")
+    parser.add_argument("--entropy_coeff", type=float, default=0.0, help="Coefficient for entropy regularization")
+    parser.add_argument("--clip", type=float, default=0.2, help="Clipping parameter for PPO surrogate loss")
+    parser.add_argument("--minibatch_size", type=int, default=64, help="Batch size for PPO updates")
+    parser.add_argument("--epochs", type=int, default=3, help="Number of optimization epochs per PPO update") #Xie
+    parser.add_argument("--use_gae", type=bool, default=True,help="Whether or not to calculate returns using Generalized Advantage Estimation")
+    parser.add_argument("--num_procs", type=int, default=12, help="Number of threads to train on")
+    parser.add_argument("--max_grad_norm", type=float, default=0.05, help="Value to clip gradients at.")
+    parser.add_argument("--max_traj_len", type=int, default=400, help="Max episode horizon")
+    parser.add_argument("--no_mirror", required=False, action="store_true", help="to use SymmetricEnv")
+    parser.add_argument("--mirror_coeff", required=False, default=0.4, type=float, help="weight for mirror loss")
+    parser.add_argument("--eval_freq", required=False, default=100, type=int, help="Frequency of performing evaluation")
+    parser.add_argument("--continued", required=False, default=None, type=str, help="path to pretrained weights")
     args = parser.parse_args()
-
-    print(args)
 
     run_experiment(args)

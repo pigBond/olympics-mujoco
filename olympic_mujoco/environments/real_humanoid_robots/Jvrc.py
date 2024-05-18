@@ -663,9 +663,9 @@ class Jvrc(BaseHumanoidRobot):
         )
         if dataset_type == "real":
             if task == "run":
-                path = "/home/wzx/new-Github-Workspaces/olympics-mujoco/random_jvrc_3.npz"
+                path = "/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/datasets/humanoids/real/random_jvrc.npz"
             else:
-                path = "/home/wzx/new-Github-Workspaces/olympics-mujoco/random_jvrc_3.npz"
+                path = "/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/datasets/humanoids/real/random_jvrc.npz"
         elif dataset_type == "perfect":
             if "use_foot_forces" in kwargs.keys():
                 assert kwargs["use_foot_forces"] is False

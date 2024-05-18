@@ -20,8 +20,8 @@ from rl.envs.normalize import get_normalization_params
 from rl.envs.wrappers import SymmetricEnv
 
 def import_env():
-    # import olympic_mujoco.environments.real_humanoid_robots.Jvrc as Env
-    import olympic_mujoco.environments.real_humanoid_robots.StickFigureA3 as Env
+    import olympic_mujoco.environments.real_humanoid_robots.Jvrc as Env
+    # import olympic_mujoco.environments.real_humanoid_robots.StickFigureA3 as Env
     return Env
 
 def run_experiment(args):

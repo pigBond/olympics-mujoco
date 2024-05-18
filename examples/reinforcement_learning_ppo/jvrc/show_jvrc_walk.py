@@ -10,6 +10,8 @@ import sys
 sys.path.append(os.getcwd())
 
 from olympic_mujoco.environments.loco_env_base import LocoEnvBase
+from olympic_mujoco.enums.enums import AlgorithmType
+
 
 def print_reward(ep_rewards):
     mean_rewards = {k:[] for k in ep_rewards[-1].keys()}
@@ -56,7 +58,7 @@ def run(env, policy):
 
 def main():
     # _path="/home/wzx/test-workspace/LearningHumanoidWalking/trained/jvrc_stepper/actor.pt"
-    _path="/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/trained/test_test_5/actor.pt"
+    _path="/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/trained/jvrc_walk/actor.pt"
 
     path_to_actor = ""
     path_to_pkl = ""
@@ -73,7 +75,10 @@ def main():
     policy = torch.load(path_to_actor)
     policy.eval()
 
-    env = LocoEnvBase.make("Jvrc.run.real")
+    env = LocoEnvBase.make("Jvrc.run.real",algorithm_type=AlgorithmType.REINFORCEMENT_LEARNING)
+    print("*********************************************")
+    print("env.algorithm_type = ",env._algorithm_type)
+    print("*********************************************")
 
     # path_to_actor =  /home/wzx/test-workspace/LearningHumanoidWalking/trained/jvrc_stepper/actor.pt
     # run_args =  Namespace(anneal=1.0, clip=0.2, continued=None, entropy_coeff=0.0, env='jvrc_step', epochs=3, eps=1e-05, eval_freq=100, gamma=0.99, input_norm_steps=100000, lam=0.95, logdir='stepper_logs/log_jvrc_full', lr=0.0001, max_grad_norm=0.05, max_traj_len=400, minibatch_size=64, mirror_coeff=0.4, n_itr=20000, no_mirror=False, num_procs=24, num_steps=5096, seed=0, std_dev=-1.5, use_gae=True)

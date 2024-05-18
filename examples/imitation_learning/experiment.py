@@ -12,6 +12,8 @@ from mushroom_rl.core.logger.logger import Logger
 from imitation_lib.utils import BestAgentSaver
 
 from olympic_mujoco.environments.loco_env_base import LocoEnvBase
+from olympic_mujoco.enums.enums import AlgorithmType
+
 from utils import get_agent
 
 
@@ -40,6 +42,9 @@ def experiment(env_id: str = None,
 
     # create environment, agent and core
     mdp = LocoEnvBase.make(env_id)
+
+    mdp.set_algorithm_type(AlgorithmType.IMITATION_LEARNING)
+
     agent = get_agent(env_id, mdp, use_cuda, sw)
     core = Core(agent, mdp)
 
