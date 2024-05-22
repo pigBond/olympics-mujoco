@@ -24,7 +24,7 @@ def experiment(env_id: str = None,
                n_eval_episodes: int = 50,
                n_epochs_save: int = 500,
                gamma: float = 0.99,
-               results_dir: str = './logs',
+               results_dir: str = './logs_2',
                use_cuda: bool = False,
                seed: int = 0):
 

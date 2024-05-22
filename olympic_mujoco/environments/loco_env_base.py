@@ -193,15 +193,15 @@ class LocoEnvBase(MultiMuJoCo):
         self._use_absorbing_states = use_absorbing_states
 
         # 强化学习算法相关
-        self.frame_skip = (control_dt/sim_dt)
-        self._model.opt.timestep = sim_dt
+        if self._algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
+            self.frame_skip = (control_dt/sim_dt)
+            self._model.opt.timestep = sim_dt
 
-        self.init_qpos = self._data.qpos.ravel().copy()
-        self.init_qvel = self._data.qvel.ravel().copy()
+            self.init_qpos = self._data.qpos.ravel().copy()
+            self.init_qvel = self._data.qvel.ravel().copy()
 
     def set_algorithm_type(self, algorithm_type):
         self._algorithm_type = algorithm_type
-
 
     # ***********************************************************************************************************
 
@@ -216,17 +216,28 @@ class LocoEnvBase(MultiMuJoCo):
         """
         raise NotImplementedError
     
+    # TODO:这里修改
     def test_reset(self):
-        # print("这里调用的是test_reset")
         mujoco.mj_resetData(self._model, self._data)
         ob = self.reset_model()
         return ob
 
-    def render(self):
+    def render(self,record=False):
         if self.viewer is None:
             # TODO:后续有时间这里应修改成自己的viewer库
-            self.viewer = mujoco_viewer.MujocoViewer(self._model, self._data)
+            self.viewer = mujoco_viewer.MujocoViewer(self._model, self._data,title="Olympic Mujoco")
+            # if self._algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
             self.viewer_setup()
+        # print("*********************************************")
+        # print("Camera Parameters:")
+        # print(f"Track Body ID: {self.viewer.cam.trackbodyid}")
+        # print(f"Distance: {self.viewer.cam.distance}")
+        # print(f"Lookat (X, Y, Z): {self.viewer.cam.lookat}")
+        # print(f"Elevation: {self.viewer.cam.elevation}")
+        # print(f"Azimuth: {self.viewer.cam.azimuth}")
+        # print(f"Geometry Group: {self.viewer.vopt.geomgroup}")
+        # print(f"Render Every Frame: {self.viewer._render_every_frame}")
+        # print("*********************************************")
         self.viewer.render()
 
     def viewer_setup(self):
@@ -235,13 +246,28 @@ class LocoEnvBase(MultiMuJoCo):
         Optionally implement this method, if you need to tinker with camera position
         and so forth.
         """
-        self.viewer.cam.trackbodyid = 1
-        self.viewer.cam.distance = self._model.stat.extent * 1.5
-        self.viewer.cam.lookat[2] = 1.5
-        self.viewer.cam.lookat[0] = 2.0
-        self.viewer.cam.elevation = -20
-        self.viewer.vopt.geomgroup[0] = 1
-        self.viewer._render_every_frame = True
+        if self._algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
+            self.viewer.cam.trackbodyid = 1
+            self.viewer.cam.distance = self._model.stat.extent * 1.5
+            self.viewer.cam.lookat[2] = 0.1
+            self.viewer.cam.lookat[0] = 2.0
+            self.viewer.cam.elevation = -20
+            self.viewer.vopt.geomgroup[0] = 1
+            self.viewer._render_every_frame = True
+        elif self._algorithm_type == AlgorithmType.IMITATION_LEARNING:
+            # 设置相机跟踪的物体或身体的ID
+            self.viewer.cam.trackbodyid = 1
+            # 设置相机与目标之间的距离
+            self.viewer.cam.distance = 12
+            # 设置相机的焦点位置
+            self.viewer.cam.lookat = [5, 3, 1.2]
+            # 设置相机的角度
+            self.viewer.cam.elevation = -0.7
+            self.viewer.cam.azimuth = 140
+            # 设置要显示的几何组
+            self.viewer.vopt.geomgroup = [1, 1, 1, 0, 0, 0]
+            # 设置视图在每一帧都渲染
+            self.viewer._render_every_frame = True
 
     def viewer_is_paused(self):
         return self.viewer._paused
@@ -521,9 +547,8 @@ class LocoEnvBase(MultiMuJoCo):
     
     #---------------------------------------------------------------------------------------------------------
 
-
     #---------------------------------------------------------------------------------------------------------
-    #----------------------------------------- 环境状态的设置 ----------------------------------------------
+    #----------------------------------------- 环境状态的设置 ------------------------------------------------
     #---------------------------------------------------------------------------------------------------------
 
     def reset(self, obs=None):
@@ -667,21 +692,8 @@ class LocoEnvBase(MultiMuJoCo):
 
     #---------------------------------------------------------------------------------------------------------
 
-    def is_absorbing(self, obs):
-        """
-        Checks if an observation is an absorbing state or not.
 
-        Args:
-            obs (np.array): Current observation;
-
-        Returns:
-            True, if the observation is an absorbing state; otherwise False;
-
-        """
-
-        return self._has_fallen(obs) if self._use_absorbing_states else False
     
-
     #---------------------------------------------------------------------------------------------------------
     #----------------------------------------- 对观测空间操作 ----------------------------------------------
     #---------------------------------------------------------------------------------------------------------
@@ -1147,15 +1159,22 @@ class LocoEnvBase(MultiMuJoCo):
 
         return mean_grf
 
-    
 
-    # TODO: 这里是否还要抽象出一个类 但是这里已经是调用obs_helper类了
     def _get_joint_pos(self):
         """
         Returns a vector (np.array) containing the current joint position of the model in the simulation.
 
         """
         return self.obs_helper.get_joint_pos_from_obs(
+            self.obs_helper._build_obs(self._data)
+        )
+    
+    def _get_joint_vel(self):
+        """
+        Returns a vector (np.array) containing the current joint vel of the model in the simulation.
+
+        """
+        return self.obs_helper.get_joint_vel_from_obs(
             self.obs_helper._build_obs(self._data)
         )
 
@@ -1340,17 +1359,6 @@ class LocoEnvBase(MultiMuJoCo):
     
 
     _registered_envs = dict()
-
-
-
-
-
-
-
-
-
-
-
 
 
 

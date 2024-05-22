@@ -353,7 +353,6 @@ class UnitreeH1(BaseHumanoidRobot):
                             ("dq_hip_rotation_l", "hip_rotation_l", ObservationType.JOINT_VEL),
                             ("dq_knee_angle_l", "knee_angle_l", ObservationType.JOINT_VEL),
                             ("dq_ankle_angle_l", "ankle_angle_l", ObservationType.JOINT_VEL)]
-
         return observation_spec
 
     @staticmethod

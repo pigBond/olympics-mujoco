@@ -2,6 +2,39 @@
 
 
 
+# 🔥 Run
+
+**创建虚拟环境**
+
+```
+python -m venv venv
+```
+
+**windows**
+
+```
+.\venv\Scripts\activate
+set PYTHONPATH=.;%PYTHONPATH%
+```
+
+**ubuntu**
+
+```
+source venv/bin/activate
+```
+
+**依赖**
+
+```
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
+```
+pip install -r requirements.txt
+```
+
+
+
 1. **`LocoEnvBase`类**：
    - 这个类应该包含与MuJoCo环境交互的通用方法，如环境的初始化、渲染、步骤函数、重置环境等。
    - 可以定义一些抽象方法或接口，这些方法在子类中必须被实现，以确保所有的机器人操作类都具备某些核心功能。

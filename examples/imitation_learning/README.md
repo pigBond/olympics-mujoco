@@ -106,8 +106,7 @@ The best agents are saved every `n_epochs_save` epochs at your specified directo
 
 ```python
 from mushroom_rl.core import Core, Agent
-from loco_mujoco import LocoEnv
-
+from olympic_mujoco.environments.loco_env_base import LocoEnvBase
 
 env = LocoEnv.make("Atlas.walk")
 

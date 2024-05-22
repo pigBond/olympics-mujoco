@@ -7,6 +7,8 @@ from mushroom_rl.utils.running_stats import *
 
 import olympic_mujoco
 from olympic_mujoco.environments import LocoEnvBase
+from olympic_mujoco.enums.enums import AlgorithmType
+
 
 class BaseHumanoidRobot(LocoEnvBase):
     """
@@ -150,10 +152,6 @@ class BaseHumanoidRobot(LocoEnvBase):
         elif task == "run":
             reward_params = dict(target_velocity=2.5)
             mdp = env(reward_type="target_velocity", reward_params=reward_params, **kwargs)
-        elif task== "test":
-            print("base_humanoid_robot task==test --------------")
-            reward_params = dict(target_velocity=2.5)
-            mdp = env(reward_type="target_velocity", reward_params=reward_params, **kwargs)
 
 
         # Load the trajectory
@@ -234,3 +232,37 @@ class BaseHumanoidRobot(LocoEnvBase):
         mdp.load_trajectory(traj_params, warn=False)
 
         return mdp
+    
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- 奖励函数 ------------------------------------------------------
+    #---------------------------------------------------------------------------------------------------------
+
+
+    #---------------------------------------------------------------------------------------------------------
+
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- 吸收终止函数 --------------------------------------------------
+    #---------------------------------------------------------------------------------------------------------
+
+    def _has_fallen(self, obs, return_err_msg=False):
+        raise NotImplementedError
+    def _has_done(self):
+        raise NotImplementedError
+
+    def is_absorbing(self, obs):
+        """
+        Checks if an observation is an absorbing state or not.
+
+        Args:
+            obs (np.array): Current observation;
+
+        Returns:
+            True, if the observation is an absorbing state; otherwise False;
+
+        """
+        if self._algorithm_type == AlgorithmType.REINFORCEMENT_LEARNING:
+            return self._has_done()
+        elif self._algorithm_type == AlgorithmType.IMITATION_LEARNING:
+            return self._has_fallen(obs) if self._use_absorbing_states else False
+
+    #---------------------------------------------------------------------------------------------------------

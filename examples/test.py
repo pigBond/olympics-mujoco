@@ -18,11 +18,11 @@ def experiment(seed=0):
     # np.random.seed(seed)
 
     # mdp = LocoEnv.make("TestHumanoid.run.perfect")
-    # mdp = LocoEnvBase.make("UnitreeH1.walk.perfect")
+    mdp = LocoEnvBase.make("UnitreeH1.walk.real")
     # mdp = LocoEnvBase.make("StickFigureA1.run.real")
     # mdp = LocoEnvBase.make("Jvrc.run.real")
     # mdp = LocoEnvBase.make("StickFigureA3.run.real")
-    mdp = LocoEnvBase.make("Talos.walk.real")
+    # mdp = LocoEnvBase.make("Talos.walk.real")
 
 
     mdp.play_trajectory_from_velocity(n_episodes=3, n_steps_per_episode=500)

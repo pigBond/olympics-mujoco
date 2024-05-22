@@ -5,7 +5,7 @@ from experiment_launcher.utils import is_local
 if __name__ == '__main__':
     LOCAL = is_local()
     TEST = False
-    USE_CUDA = False
+    USE_CUDA = True
 
     N_SEEDS = 3
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     # env_ids = ["Atlas.walk", 
     #            "Talos.walk", 
     #            "UnitreeH1.walk", "UnitreeH1.run"]
-    env_ids = ["Atlas.walk"]
+    env_ids = ["UnitreeH1.walk"]
 
     for env_id in env_ids:
         launcher.add_experiment(env_id__=env_id, **default_params)

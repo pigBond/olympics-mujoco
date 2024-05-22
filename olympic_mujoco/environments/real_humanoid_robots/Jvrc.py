@@ -144,13 +144,8 @@ class Jvrc(BaseHumanoidRobot):
             xml_handles, action_spec, observation_spec, collision_groups, **kwargs
         )
 
-        # TODO:强化学习训练的代码
         self._initialize_observation_space()
 
-
-
-        # TODO:测试内容
-        # print("joints name = ",self.interface.get_joint_names())
         
     #---------------------------------------------------------------------------------------------------------
     #----------------------------------------- 观测空间的处理 --------------------------------------------------
@@ -201,10 +196,6 @@ class Jvrc(BaseHumanoidRobot):
 
             # set up interface
             self.interface = MujocoRobotInterface(self._model, self._data, 'R_ANKLE_P_S', 'L_ANKLE_P_S')
-
-            # print("***********************************************************")
-            # print("joint names = ",self.interface.get_joint_names())
-            # print("***********************************************************")
 
             # set up task
             self.task = walking_task.WalkingTask(client=self.interface,
@@ -305,7 +296,7 @@ class Jvrc(BaseHumanoidRobot):
             total_reward = sum([float(i) for i in rewards.values()])
 
             # check if terminate
-            done = self.task.done()
+            done = self._has_done()
 
             obs = self.get_obs()
             return obs, total_reward, done, rewards
@@ -573,6 +564,13 @@ class Jvrc(BaseHumanoidRobot):
         return action_spec
     #---------------------------------------------------------------------------------------------------------
 
+
+    #---------------------------------------------------------------------------------------------------------
+    #----------------------------------------- 吸收终止函数 --------------------------------------------------
+    #---------------------------------------------------------------------------------------------------------
+    def _has_done(self):
+        return self.task.done()
+
     def _has_fallen(self, obs, return_err_msg=False):
         """
         Checks if a model has fallen.
@@ -617,6 +615,7 @@ class Jvrc(BaseHumanoidRobot):
 
         #     return pelvis_condition
 
+    #---------------------------------------------------------------------------------------------------------
 
     def _get_ground_forces(self):
         """

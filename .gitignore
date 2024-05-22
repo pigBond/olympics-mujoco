@@ -3,4 +3,5 @@ __pycache__/
 olympic_mujoco/datasets/
 olympic_mujoco/trained/
 logs/
+logs_2/
 logs_dir/
