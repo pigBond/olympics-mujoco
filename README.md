@@ -2,7 +2,11 @@
 
 
 
-# 🔥 Run
+本项目是一个基于Mujoco的仿真人形机器人平台，采用三层架构设计，包括基础层、抽象层和应用层，以模拟多种机器人的行为和性能。平台支持模仿学习和强化学习训练，并具备理想轨迹可视化功能，为机器人技术的研究和开发提供了一个高效、灵活的仿真环境。
+
+
+
+## 🔥 运行
 
 **创建虚拟环境**
 
@@ -35,6 +39,22 @@ pip install -r requirements.txt
 
 
 
+## 🌟效果
+
+
+
+
+
+
+
+## 📝待办
+
+- [ ] 重构整个项目
+
+
+
+## 🔆 想法
+
 1. **`LocoEnvBase`类**：
    - 这个类应该包含与MuJoCo环境交互的通用方法，如环境的初始化、渲染、步骤函数、重置环境等。
    - 可以定义一些抽象方法或接口，这些方法在子类中必须被实现，以确保所有的机器人操作类都具备某些核心功能。
@@ -44,10 +64,6 @@ pip install -r requirements.txt
 3. **`UnitreeH1`类**：
    - 这个类继承自`BaseHumanoidRobot`，应该包含特定于`UnitreeH1`机器人的实现细节，比如它的机械结构、传感器数据读取、特有的动作等。
    - 对于一些特定的方法，比如与`UnitreeH1`硬件相关的控制接口，应该在这里实现。
-
-
-
-
 
 
 
@@ -75,8 +91,6 @@ pip install -r requirements.txt
 
 
 
-
-
 ```python
 class MujocoRobotInterface(object):
 
@@ -84,8 +98,6 @@ class MujocoRobotInterface(object):
 ```
 
 由于这里使用`rfoot_body_name`和`lfoot_body_name`作为参数，所以**该类应在UnitreeH1类中实例化使用**。
-
-
 
 
 
@@ -140,8 +152,6 @@ self.model = mujoco.MjModel.from_xml_path(fullpath)
 
 
 
-
-
 ### 区分模仿学习和强化学习的实现
 
 
@@ -166,23 +176,73 @@ class AlgorithmType(Enum):
 
 
 
+## 🛠️项目架构
+
+本项目采用三层架构设计，包括基础层、抽象层和应用层。每一层负责不同的功能模块，确保系统的模块化和扩展性。
+
+```mermaid
+graph TD
+
+%% 应用层
+subgraph 应用层
+	style 应用层 fill:#a6c,stroke:#333,stroke-width:2px;
+    A1[环境初始化与配置模块]
+    A2[观测空间处理模块]
+    A3[步进与重置模块]
+    A4[任务模块]
+end
+
+%% 抽象层
+subgraph 抽象层
+	style 抽象层 fill:#36f,stroke:#333,stroke-width:2px;
+    B1[环境初始化和配置模块]
+    B2[观测空间处理模块]
+    B3[任务生成模块]
+    B4[数据集操作模块]
+end
+
+%% 基础层
+subgraph 基础层
+    style 基础层 fill:#cfc,stroke:#333,stroke-width:2px;
+    C1[环境初始化和配置模块]
+    C2[观测和动作处理模块]
+    C3[模拟和渲染模块]
+    C4[轨迹处理模块]
+    C5[数据集操作模块]
+    C6[模型状态与接口模块]
+end
+
+%% 基础层与抽象层的连接
+B1 --> C1
+B2 --> C2
+B4 --> C5
+
+%% 抽象层与应用层的连接
+A1 --> B1
+A2 --> B2
+A4 --> B3
+
+%% 基础层与应用层的连接
+A3 --> C3
+A3 --> C4
+A3 --> C6
+
+```
 
 
-# 备忘
 
-现在以一种很奇怪的方式达成了共存，但是新的问题是，两个项目的obs存在冲突
+## 🍀 致谢
 
-一个是使用obs_helper 辅助 obs规范进行统一的管理，优点是方便管理而且清晰，缺点是有些数据没办法直接获取
-
-另一个是使用直接从原生mujoco的data中获取数据的接口类，优点缺点恰好与前面的方法互补
-
-
-
-但是目前并不能确定哪一种方法更有效，同时也并不清楚两种方式共存会不会出现新的bug，所以不敢贸然去修改原生的问题
-
-
-
-
+- **LocoMujoco**
+  - 作者: robfiras
+  - 项目地址: [GitHub](https://github.com/robfiras/loco-mujoco)
+  - 描述: LocoMujoco 是一个基于 Mujoco 物理引擎的开源项目，专注于机器人运动控制和仿真，提供了高效的物理模拟和灵活的控制接口。
+  - 许可证: [MIT License](https://github.com/robfiras/loco-mujoco/blob/master/LICENSE)
+- **LearningHumanoidWalking**
+  - 作者: rohanpsingh
+  - 项目地址: [GitHub](https://github.com/rohanpsingh/LearningHumanoidWalking)
+  - 描述: LearningHumanoidWalking 是一个研究项目，旨在通过机器学习技术优化双足机器人的行走步态，实现更自然和高效的行走模式。
+  - 许可证: [MIT License](https://github.com/rohanpsingh/LearningHumanoidWalking/blob/master/LICENSE)
 
 
 

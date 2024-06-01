@@ -39,7 +39,7 @@ class WalkingTask(object):
         self._rfoot_body_name = rfoot_body  # 保存右脚身体部分名称
 
         # 读取先前生成的脚步计划
-        with open('/home/wzx/new-Github-Workspaces/olympics-mujoco/footstep_plans.txt', 'r') as fn:
+        with open('footstep_plans.txt', 'r') as fn:
             lines = [l.strip() for l in fn.readlines()]  # 读取文件，并去除每行首尾空白字符
         self.plans = []  # 初始化计划列表
         sequence = []  # 初始化序列列表

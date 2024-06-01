@@ -17,6 +17,8 @@ env.set_algorithm_type(AlgorithmType.IMITATION_LEARNING)
 # logs_2/env_id___UnitreeH1.walk__gail/2/agent_epoch_397_J_870.328114.msh
 
 agent_path="logs_2/env_id___UnitreeH1.walk__vail/2/agent_epoch_393_J_983.155679.msh"
+# agent_path="logs_2/env_id___UnitreeH1.walk__gail/2/agent_epoch_397_J_870.328114.msh"
+
 agent = Agent.load(agent_path)
 
 # 创建核心对象
@@ -33,6 +35,9 @@ def evaluate_(n_episodes,n_steps_per_episode=500,render=True):
             action = agent.draw_action(state)
             # 执行动作，获取下一个状态和奖励
             next_state, reward, done, info = env.step(action)
+
+            observation_keys = env.get_all_observation_keys()
+            print("observation_keys = ",observation_keys)
 
             # 更新状态
             state = next_state

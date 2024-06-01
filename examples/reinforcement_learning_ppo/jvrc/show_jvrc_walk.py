@@ -57,8 +57,7 @@ def run(env, policy):
     env.close()
 
 def main():
-    # _path="/home/wzx/test-workspace/LearningHumanoidWalking/trained/jvrc_stepper/actor.pt"
-    _path="/home/wzx/new-Github-Workspaces/olympics-mujoco/olympic_mujoco/trained/jvrc_walk/actor.pt"
+    _path="olympic_mujoco/trained/jvrc_walk/actor.pt"
 
     path_to_actor = ""
     path_to_pkl = ""

@@ -255,15 +255,29 @@ class LocoEnvBase(MultiMuJoCo):
             self.viewer.vopt.geomgroup[0] = 1
             self.viewer._render_every_frame = True
         elif self._algorithm_type == AlgorithmType.IMITATION_LEARNING:
+            # # 设置相机跟踪的物体或身体的ID
+            # self.viewer.cam.trackbodyid = 1
+            # # 设置相机与目标之间的距离
+            # self.viewer.cam.distance = 12
+            # # 设置相机的焦点位置
+            # self.viewer.cam.lookat = [5, 3, 1.2]
+            # # 设置相机的角度
+            # self.viewer.cam.elevation = -0.7
+            # self.viewer.cam.azimuth = 140
+            # # 设置要显示的几何组
+            # self.viewer.vopt.geomgroup = [1, 1, 1, 0, 0, 0]
+            # # 设置视图在每一帧都渲染
+            # self.viewer._render_every_frame = True
+
             # 设置相机跟踪的物体或身体的ID
             self.viewer.cam.trackbodyid = 1
             # 设置相机与目标之间的距离
-            self.viewer.cam.distance = 12
+            self.viewer.cam.distance = 6
             # 设置相机的焦点位置
-            self.viewer.cam.lookat = [5, 3, 1.2]
+            self.viewer.cam.lookat = [1.8, 2.5, 1]
             # 设置相机的角度
-            self.viewer.cam.elevation = -0.7
-            self.viewer.cam.azimuth = 140
+            self.viewer.cam.elevation = 0
+            self.viewer.cam.azimuth = 90
             # 设置要显示的几何组
             self.viewer.vopt.geomgroup = [1, 1, 1, 0, 0, 0]
             # 设置视图在每一帧都渲染
