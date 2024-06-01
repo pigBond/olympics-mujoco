@@ -37,7 +37,14 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 pip install -r requirements.txt
 ```
 
-### example
+**数据集与训练模型复现**
+
+log_2文件夹放置于项目根目录下
+
+datasets文件夹放置于olympic_mujoco目录下
+
+链接：https://pan.baidu.com/s/1aP-29COrVIN_VbTM4BO7aQ?pwd=csef 
+提取码：csef 
 
 **理想轨迹可视化**
 
