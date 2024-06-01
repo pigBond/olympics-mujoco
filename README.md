@@ -37,15 +37,78 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 pip install -r requirements.txt
 ```
 
+### example
 
+**理想轨迹可视化**
+
+windows
+
+```shell
+python examples\play_walking_trajectory\test.py
+```
+
+ubuntu
+
+```
+python examples/play_walking_trajectory/test.py
+```
+
+示例代码
+
+```python
+from olympic_mujoco.environments.loco_env_base import LocoEnvBase
+
+def experiment(seed=0):
+
+    mdp = LocoEnvBase.make("UnitreeH1.walk.real")
+
+    mdp.play_trajectory_from_velocity(n_episodes=3, n_steps_per_episode=500)
+
+if __name__ == '__main__':
+    experiment()
+```
+
+**ppo算法训练**
+
+```
+python examples/reinforcement_learning_ppo/a3/train_a3_walk.py
+```
+
+```
+python examples/reinforcement_learning_ppo/a3/show_a3_walk.py
+```
+
+**模仿学习训练**
+
+```
+python examples/imitation_learning/launcher.py
+```
+
+**模仿学习评估**
+
+```
+python examples/evaluate_imitation_learning/evaluate_viewer.py
+python examples/evaluate_imitation_learning/evaluate_save_npz.py
+python examples/evaluate_imitation_learning/npz_plt.py
+```
 
 ## 🌟效果
 
+### 理想行走轨迹可视化
 
+<img src="docs/gif/replay_unitreeh1_walk.gif" width="300" alt="vail_unitreeh1_walk">
 
+### PPO算法人形机器人行走
 
+<img src="docs/gif/ppo_a3_walk.gif" width="300" alt="ppo_a3_walk">
 
+###  模仿学习GAIL、VAIL算法人形机器人行走
 
+<img src="docs/gif/vail_unitreeh1_walk.gif" width="300" alt="vail_unitreeh1_walk">
+
+### 模仿学习效果分析
+
+<img src="docs/img/q_pelvis_tilt.png" width="700" alt="vail_unitreeh1_walk">
 
 ## 📝待办
 

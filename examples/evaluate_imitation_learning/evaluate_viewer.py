@@ -36,8 +36,8 @@ def evaluate_(n_episodes,n_steps_per_episode=500,render=True):
             # 执行动作，获取下一个状态和奖励
             next_state, reward, done, info = env.step(action)
 
-            observation_keys = env.get_all_observation_keys()
-            print("observation_keys = ",observation_keys)
+            # observation_keys = env.get_all_observation_keys()
+            # print("observation_keys = ",observation_keys)
 
             # 更新状态
             state = next_state
