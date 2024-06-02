@@ -313,6 +313,11 @@ A3 --> C6
   - 项目地址: [GitHub](https://github.com/rohanpsingh/LearningHumanoidWalking)
   - 描述: LearningHumanoidWalking 是一个研究项目，旨在通过机器学习技术优化双足机器人的行走步态，实现更自然和高效的行走模式。
   - 许可证: [MIT License](https://github.com/rohanpsingh/LearningHumanoidWalking/blob/master/LICENSE)
+- **ls-iq**
+  - 作者: robfiras
+  - 项目地址: [GitHub](https://github.com/robfiras/ls-iq)
+  - 描述: Code of the paper "LS-IQ: Implicit Reward Regularization for Inverse Reinforcement Learning" & LocoMuJoCo Baselines
+  - 许可证: [MIT License](https://github.com/rohanpsingh/LearningHumanoidWalking/blob/master/LICENSE)
 
 
 
