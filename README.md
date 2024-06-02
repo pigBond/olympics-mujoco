@@ -78,7 +78,7 @@ if __name__ == '__main__':
 **ppo算法训练**
 
 ```
-python examples/reinforcement_learning_ppo/a3/train_a3_walk.py
+python examples/reinforcement_learning_ppo/a3/train_a3_walk.py train
 ```
 
 ```
